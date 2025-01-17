@@ -19,6 +19,10 @@ const userSchema = new Schema({
 		type: String,
 		required: true,
 	},
+	/*
+		we may need to specify seperate schema for role
+		where we can define all the roles and their permissions
+	*/
 	role: {
 		type: String,
 		enum: ["student", "teacher", "admin"],
