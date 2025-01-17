@@ -12,6 +12,7 @@ const hashPassword = async (password) => {
 	try {
 		const hash = await bcrypt.hash(password, saltRounds);
 		if (!hash) return;
+		
 		return hash;
 	} catch (err) {
 		console.log(err);
@@ -40,7 +41,8 @@ const signUpUser = async (req, res) => {
 				.status(409)
 				.json({ message: "User already exists, please log in" });
 		}
-		hash = await hashPassword(req.body.password);
+
+		const hash = await hashPassword(req.body.password);
 		const newUser = new userModel({
 			Name: req.body.name,
 			email: req.body.email,
@@ -75,8 +77,11 @@ const loginUser = async (req, res) => {
 				.status(400)
 				.json({ message: `Validation error: ${error.details[0].message}` });
 		}
+		
 		const existingUser = await userModel.findOne({ email: req.body.email });
 		if (!existingUser) return res.status(404).send("User Not Found");
+
+
 		const password = req.body.password;
 		const result = await matchPassword(password, existingUser.password_hash);
 		if (!existingUser || !result) {
@@ -90,7 +95,7 @@ const loginUser = async (req, res) => {
 			sameSite: "Lax", // Allow basic cross-origin
 			expires: new Date(Date.now() + 28800000), // Cookie will be removed after 8 hours
 		});
-		
+
 		console.log("Logged IN!");
 		res.json(existingUser);
 	} catch (err) {
@@ -99,28 +104,4 @@ const loginUser = async (req, res) => {
 	}
 };
 
-const authenticateUser = (req, res, next) => {
-	var token = req.headers?.cookie; // Safely access the token
-
-	if (!token) {
-		return res.status(401).send("Access Denied: No Token Provided");
-	}
-
-	try {
-		const token = req.headers.cookie
-			.split("; ")
-			.find((item) => item.startsWith("token="))
-			?.split("=")[1];
-		if (!token) {
-			return res.status(401).json({ message: "Access Denied: Token Missing" });
-		}
-
-		const verifiedUser = jwt.verify(token, process.env.SECRET_HASH_STRING);
-		req.user = verifiedUser;
-
-	} catch (err) {
-		return res.status(403).json({ message: "Invalid Token" });
-	}
-};
-
-module.exports = { loginUser, signUpUser, authenticateUser };
+module.exports = { loginUser, signUpUser };

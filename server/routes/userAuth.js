@@ -5,8 +5,9 @@ const userModel = require("../models/user");
 const {
   loginUser,
   signUpUser,
-  authenticateUser,
 } = require("../controllers/userController/UserAuth");
+const authenticateUser = require("../middlewares/authenticateUser");
+
 
 router.route("/login").post(loginUser);
 router.route("/signup").post(signUpUser);
