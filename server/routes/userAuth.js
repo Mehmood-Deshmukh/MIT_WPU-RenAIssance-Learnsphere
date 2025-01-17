@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/user");
 const {
   loginUser,
-  singUpUser,
+  signUpUser,
   authenticateUser,
 } = require("../controllers/UserAuth");
 
@@ -23,9 +23,9 @@ router.get("/logout", (req, res) => {
   res.status(200).json({ message: "Logged Out" });
 });
 
-router.route("/authenticate-user").post(authenticateUser, (req, res) => {
+router.route("/authenticate-user").post(authenticateUser, async (req, res) => {
   console.log(req.user.id);
-  const foundUser = userModel.findById(req.user.id);
+  const foundUser = await userModel.findById(req.user.id);
   res.status(200).json(foundUser);
 });
 
