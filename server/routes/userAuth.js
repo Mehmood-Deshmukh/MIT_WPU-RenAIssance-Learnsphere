@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/user");
 const {
   loginUser,
-  singUpUser,
+  signUpUser,
   authenticateUser,
 } = require("../controllers/UserAuth");
 
