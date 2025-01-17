@@ -5,7 +5,7 @@ const { loginSchema, signUpSchema } = require("./Validation");
 const saltRounds = 10;
 
 const createToken = (id) => {
-  return jwt.sign(id, process.env.JWTSECRET, { expiresIn: 24 * 60 * 60 });
+  return jwt.sign({ id }, process.env.JWTSECRET, { expiresIn: 24 * 60 * 60 });
 };
 
 const hashPassword = async (password) => {
@@ -31,8 +31,10 @@ const matchPassword = async (password, hashed_password) => {
 const signUpUser = async (req, res) => {
   try {
     const { error } = signUpSchema.validate(req.body);
-    if (error)
+    if (error) {
+      console.log(error);
       return res.status(400).json({ message: "Schema Validation Failed" });
+    }
 
     const existingUser = await userModel.findOne({ email: req.body.email });
     if (existingUser) {
@@ -42,10 +44,10 @@ const signUpUser = async (req, res) => {
     }
     hash = await hashPassword(req.body.password);
     const newUser = new userModel({
-      Name: req.body.name,
+      Name: req.body.Name,
       email: req.body.email,
       password: hash,
-      rollNumber: req.body.rollNo,
+      rollNumber: req.body.rollNumber,
     });
     const savedUser = await newUser.save();
     const token = createToken(savedUser._id);
@@ -59,6 +61,7 @@ const signUpUser = async (req, res) => {
     });
     return res.status(200).json({ savedUser, token });
   } catch (err) {
+    console.log(err);
     res
       .status(400)
       .json({ message: "An Error Occured Please Try Again Later" });
@@ -76,11 +79,12 @@ const loginUser = async (req, res) => {
     const existingUser = await userModel.findOne({ email: req.body.email });
     if (!existingUser) return res.status(404).send("User Not Found");
     const password = req.body.password;
-    const result = await matchPassword(password, existingUser.password_hash);
+    // console.log(password);
+    const result = await matchPassword(password, existingUser.password);
     if (!existingUser || !result) {
       return res.status(409).json({ message: "Invalid Credentials" });
     }
-    const token = createSecretToken(existingUser._id);
+    const token = createToken(existingUser._id);
     res.cookie("token", token, {
       path: "/", // Accessible across the app
       httpOnly: false, // Prevent client-side access
@@ -91,7 +95,7 @@ const loginUser = async (req, res) => {
     console.log("Logged IN!");
     res.json(existingUser);
   } catch (err) {
-    console.log("Error");
+    console.log(err);
     res.status(401).json({ message: "An Error Occured please try again" });
   }
 };
@@ -112,11 +116,12 @@ const authenticateUser = (req, res, next) => {
       return res.status(401).json({ message: "Access Denied: Token Missing" });
     }
 
-    const verifiedUser = jwt.verify(token, process.env.SECRET_HASH_STRING);
+    const verifiedUser = jwt.verify(token, process.env.JWTSECRET);
     req.user = verifiedUser;
 
     next();
   } catch (err) {
+    console.log(err);
     return res.status(403).json({ message: "Invalid Token" });
   }
 };
