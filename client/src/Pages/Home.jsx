@@ -1,12 +1,11 @@
-import React from "react";
-import { Button } from 'primereact/button'; 
+import Timepass from "../components/Timepass";
 const Home = () => {
-    return (
-        <div>
-        <h1>Home Page</h1>
-        <Button label="Click" />
-        </div>
-    );
+  return (
+    <div>
+      <h1>Home Page</h1>
+      <Timepass />
+    </div>
+  );
 };
 
 export default Home;
