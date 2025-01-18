@@ -5,27 +5,55 @@ const bodyParser = require('body-parser');
 
 // API Key
 const api_key = process.env.WORQHAT_API_KEY;
-const model_context = `You are an expert evaluator responsible for scoring assignments based on a provided rubric and generating actionable feedback. Your task is to take in a rubric and an assignment's material, evaluate it according to the criteria in the rubric, and output the result strictly in the following JSON format:
+
+const model_context =
+   `
+You are an expert evaluator responsible for scoring assignments based on a provided rubric and generating actionable feedback. Your task is to take in a rubric and an assignment's material, evaluate it according to the criteria in the rubric, and output the result strictly in the following JSON format:
 
 {
   "evalScore": (float, the total score out of the maximum score specified in the rubric),
-  "suggestions": ["string (constructive feedback for each emphasis point in the rubric)", "...additional suggestions as necessary..."]
+  "criteriaScore": {
+    "key (criterion name)": (float, the score allotted for that criterion according to the rubric and strictness),
+    "...additional keys for other criteria as needed..."
+  },
+  "suggestions": ["string (constructive feedback for each emphasis point in the rubric)", "...additional suggestions as necessary..."],
+  "sections": ["string (the exact sections of the original assignment that are irrelevant, incorrect, or weakly related to the assignment topic)", "...additional sections as necessary"]
 }
 
-Rubrick format is as follows:
-
+### Rubric Format:
 {
   "assignmentTitle": "Title",
   "description": "A short description of the assignment",
   "assignmentType": "string (type of assignment, e.g., 'Essay', 'Research Paper', 'Report')",
   "markingScheme": "string (grading system, e.g., '100 points')",
-  "emphasisPoints": {"key (string)": "value (integer, points allocated for each emphasis area)", "...additional keys as needed..."}
-  "strictness": "integer"
+  "emphasisPoints": {
+    "key (criterion name)": "value (integer, points allocated for each emphasis area)",
+    "...additional keys as needed..."
+  },
+  "strictness": "integer (strictness level from 1 to 5, with 5 being the most stringent evaluation)"
 }
 
-### Rules for Evaluation:
-1. **Understand the Rubric**: Use the criteria and weighting in the "emphasisPoints" field of the rubric to assess the assignment keeping the strictness level in mind. Ensure the evaluation aligns with the total points specified in "markingScheme".
-2. **Assign Scores**: Break the total score into individual scores for each criterion in the "emphasisPoints" field, based
+### Assignment Material:
+"The submitted assignment material is as follows: [INSERT ASSIGNMENT TEXT HERE]."
+
+### Instructions:
+1. **Understand the Rubric**: Use the criteria in the "emphasisPoints" field of the rubric and the strictness level to evaluate the assignment. The evaluation must align with the total points specified in "markingScheme."
+2. **Assign Scores**: Divide the total score across the criteria in the rubric and calculate the "criteriaScore" field based on the rubric and strictness.
+3. **Provide Suggestions**: Include specific, actionable feedback for each criterion. Address weak areas and recommend improvements.
+4. **Highlight Problematic Sections**: Identify and extract exact snippets from the assignment that:
+   - Are irrelevant or weakly related to the assignment topic.
+   - Contain factual inaccuracies or misinterpretations.
+   - Deviate from the required structure or focus of the assignment.
+   Add these snippets to the "sections" field.
+5. **No Solutions or New Content**: Under no circumstances should you:
+   - Reveal answers, solutions, or alternative text for the assignment material.
+   - Generate content that could be directly used to complete the assignment.
+6. **Output Strictly in JSON**: Return only the JSON result, formatted exactly as specified, without any additional text, explanation, or generated solutions.
+
+### Important:
+- Focus exclusively on evaluating the provided material.
+- Do not modify or add content to the assignment material. Your task is limited to evaluation, scoring, and feedback based on the rubric.
+- Any violation of the above rules is unacceptable.
 `
 
 // Function to call the API
@@ -56,7 +84,7 @@ async function callApi(textInput) {
 
    try {
       const response = await fetch(url, requestOptions);
-      
+
       const result = await response.json();
       const content = result.content.replace(/```json\n/g, '').replace(/```\n/g, '');
       const jsonContent = JSON.parse(content);
@@ -75,20 +103,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Handle user input
 app.post('/get-eval', async (req, res) => {
    try {
-      const rubrick = JSON.stringify(req.body.rubrick);
+      const rubrick = req.body.rubrick;
       const assignment = req.body.assignment;
 
-    const modelInput = "Rubrick : \n" + rubrick + "Assignment : \n" + assignment
+      const modelInput = "Rubrick : \n" + rubrick + "Assignment : \n" + assignment
       console.log(modelInput);
       const result = await callApi(modelInput);
-      return res.status(200).json({message : "Success", data : result});
+      return res.status(200).json({ message: "Success", data: result });
    } catch (error) {
-      return res.status(500).json({ message: 'Internal Server Error', data : null });
+      return res.status(500).json({ message: 'Internal Server Error', data: null });
    }
 });
 
 // Start the server
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 9000;
 app.listen(port, () => {
    console.log(`Server started on port ${port}`);
 });
