@@ -72,12 +72,12 @@ const courseEnrollmentRequestSchema = new Schema({
 
 module.exports = mongoose.model("Request", requestSchema);
 
-Request.discriminator("CourseCreationRequest", courseCreationRequestSchema);
-Request.discriminator("TeacherSignupRequest", teacherSignupRequestSchema);
-Request.discriminator("CourseEnrollmentRequest", courseEnrollmentRequestSchema);
+requestSchema.discriminator("CourseCreationRequest", courseCreationRequestSchema);
+requestSchema.discriminator("TeacherSignupRequest", teacherSignupRequestSchema);
+requestSchema.discriminator("CourseEnrollmentRequest", courseEnrollmentRequestSchema);
 
 
-Request.statics.createCourseCreationRequest = async function (requestedBy, course) {
+requestSchema.statics.createCourseCreationRequest = async function (requestedBy, course) {
     return this.create({
         type: "COURSE_CREATION",
         requestedBy,
@@ -85,14 +85,14 @@ Request.statics.createCourseCreationRequest = async function (requestedBy, cours
     });
 }
 
-Request.statics.createTeacherSignupRequest = async function (requestedBy) {
+requestSchema.statics.createTeacherSignupRequest = async function (requestedBy) {
     return this.create({
         type: "TEACHER_SIGNUP",
         requestedBy,
     });
 }
 
-Request.statics.createCourseEnrollmentRequest = async function (requestedBy, course) {
+requestSchema.statics.createCourseEnrollmentRequest = async function (requestedBy, course) {
     return this.create({
         type: "COURSE_ENROLLMENT",
         requestedBy,

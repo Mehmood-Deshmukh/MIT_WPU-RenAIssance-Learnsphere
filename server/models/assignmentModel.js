@@ -1,7 +1,7 @@
 // raw and temporoary model for assignment
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const User = require("./user");
+const User = require("./userModel");
 
 /*
 Few things to note:
