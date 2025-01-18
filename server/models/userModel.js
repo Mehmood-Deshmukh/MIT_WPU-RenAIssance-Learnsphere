@@ -35,20 +35,17 @@ const userSchema = new Schema({
     unique: true,
   },
   assignment: {},
-
-  // following fields are only for teacher
-  subjects: {
-    type: [String],
-    required: function () {
-      return this.role === "teacher";
-    },
-  },
-  isApproved: {
-    type: Boolean,
-    required: function () {
-      return this.role === "teacher";
-    },
-  },
+	// following fields are only for teacher
+	subjects: {
+		type: [String],
+		required: function () {
+			return this.role === "teacher";
+		},
+	},
+	isApproved: {
+		type: Boolean,
+		default: false,
+	},
 });
 
 module.exports = mongoose.model("User", userSchema);
