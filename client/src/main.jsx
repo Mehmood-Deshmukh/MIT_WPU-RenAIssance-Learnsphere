@@ -2,20 +2,24 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
-import { BrowserRouter, Routes, Route } from "react-router";
-import Login from "./Pages/Login.jsx";
-import Singup from "./Pages/Signup.jsx";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import { PrimeReactProvider } from 'primereact/api';
+
+import "primereact/resources/themes/lara-light-cyan/theme.css";
+import "primeicons/primeicons.css";
+import "primeflex/primeflex.css";
+
+// Toast styles
+import "react-toastify/dist/ReactToastify.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/auth/login" element={<Login />} />
-        <Route path="/auth/signup" element={<Singup />} />
-      </Routes>
-    </BrowserRouter>
-    <ToastContainer />
+    <PrimeReactProvider>
+      <BrowserRouter>
+        <App />
+        <ToastContainer />
+      </BrowserRouter>
+    </PrimeReactProvider>
   </StrictMode>
 );

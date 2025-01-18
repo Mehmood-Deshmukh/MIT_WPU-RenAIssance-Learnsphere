@@ -6,7 +6,7 @@ const multer = require("multer");
 const upload = multer();
 
 
-router.post('/upload', authenticateUser, upload.array("files", 5), fileController.uploadFile);
+router.post('/upload', upload.single("file"), authenticateUser, fileController.uploadFile);
 router.get('/:fileId', authenticateUser,fileController.getFile);
 router.get('/assignment/:assignmentId', authenticateUser, fileController.getAssignmentFiles);
 router.delete('/:fileId', authenticateUser, fileController.deleteFile);
