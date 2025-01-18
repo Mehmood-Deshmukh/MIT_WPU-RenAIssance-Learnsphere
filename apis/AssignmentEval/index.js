@@ -57,7 +57,7 @@ You are an expert evaluator responsible for scoring assignments based on a provi
 `
 
 // Function to call the API
-async function callApi(textInput) {
+async function evaluateAssignment(textInput) {
    const url = 'https://api.worqhat.com/api/ai/content/v4';
    const myHeaders = {
       'Content-Type': 'application/json',
@@ -108,8 +108,13 @@ app.post('/get-eval', async (req, res) => {
 
       const modelInput = "Rubrick : \n" + rubrick + "Assignment : \n" + assignment
       console.log(modelInput);
-      const result = await callApi(modelInput);
+      if(rubrick && assignment) {
+      const result = await evaluateAssignment(modelInput);
       return res.status(200).json({ message: "Success", data: result });
+      }
+      else {
+         return res.status(204).json({ message: "Unsuccessful", data: null });
+      }
    } catch (error) {
       return res.status(500).json({ message: 'Internal Server Error', data: null });
    }
