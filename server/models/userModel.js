@@ -44,9 +44,7 @@ const userSchema = new Schema({
 	},
 	isApproved: {
 		type: Boolean,
-		required: function () {
-			return this.role === "teacher";
-		},
+		default: false,
 	},
 });
 

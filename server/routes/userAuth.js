@@ -7,7 +7,7 @@ const {
   signUpUser,
 } = require("../controllers/userController/UserAuth");
 const authenticateUser = require("../middlewares/authenticateUser");
-
+const verifySignup = require("../middlewares/verifySignup");
 
 router.route("/login").post(loginUser);
 router.route("/signup").post(signUpUser);
