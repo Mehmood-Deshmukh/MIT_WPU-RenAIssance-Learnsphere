@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import useAuthContext from "../hooks/useAuthContext";
 
 const Singup = () => {
   const [email, setEmail] = useState("");
@@ -9,6 +10,8 @@ const Singup = () => {
   const [rollNumber, setrollNumber] = useState("");
   const navigate = useNavigate();
   const [userRole, setUserRole] = useState("student");
+  const { dispatch } = useAuthContext();
+
   const handleSubmit = async (evt) => {
     evt.preventDefault();
 
@@ -28,8 +31,10 @@ const Singup = () => {
       console.log(response.status);
       sessionStorage.setItem("token", response.data.token);
       if (response.status === 200) {
+        dispatch({ type: "LOGIN", payload: response.data });
         navigate("/");
       }
+
     } catch (err) {
       console.log(err);
     }
