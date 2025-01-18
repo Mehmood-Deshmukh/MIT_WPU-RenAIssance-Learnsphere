@@ -42,9 +42,12 @@ const userSchema = new Schema({
 			return this.role === "teacher";
 		},
 	},
-
-	
-
+	isApproved: {
+		type: Boolean,
+		required: function () {
+			return this.role === "teacher";
+		},
+	},
 });
 
 module.exports = mongoose.model("User", userSchema);
