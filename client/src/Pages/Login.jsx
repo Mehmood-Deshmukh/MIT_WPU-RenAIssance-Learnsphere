@@ -1,23 +1,35 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     const formdata = new FormData();
     formdata.append("email", email);
     formdata.append("password", password);
+    const data = {
+      email: email,
+      password: password,
+    };
     try {
       const response = await axios.post(
         "http://localhost:3000/auth/login",
-        formdata
+        data,
+        { withCredentials: true }
       );
       if (response.status === 200) {
-        localStorage.setItem("token", response.data.token);
+        sessionStorage.setItem("token", response.data.token);
+        localStorage.setItem("token", JSON.stringify(response.data.token));
+        navigate("/");
       }
     } catch (err) {
       console.log(err);
+      toast.error(err.response.data.message);
     }
   };
   return (

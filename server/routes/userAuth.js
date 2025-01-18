@@ -5,13 +5,14 @@ const userModel = require("../models/user");
 const {
   loginUser,
   signUpUser,
-  authenticateUser,
 } = require("../controllers/userController/UserAuth");
+const authenticateUser = require("../middlewares/authenticateUser.js");
 
 router.route("/login").post(loginUser);
 router.route("/signup").post(signUpUser);
 
 router.get("/logout", (req, res) => {
+  req.session.destroy();
   res.cookie("token", "none", {
     path: "/",
     httpOnly: false,
@@ -19,14 +20,17 @@ router.get("/logout", (req, res) => {
     sameSite: "Lax",
     expires: new Date(Date.now() + 1000),
   });
-
   res.status(200).json({ message: "Logged Out" });
 });
 
 router.route("/authenticate-user").post(authenticateUser, async (req, res) => {
-  console.log(req.user.id);
-  const foundUser = await userModel.findById(req.user.id);
-  res.status(200).json(foundUser);
+  try {
+    const foundUser = await userModel.findById(req.user?.id);
+    res.status(200).send({ message: "Authenticated", user: foundUser });
+  } catch (err) {
+    console.log(err);
+    res.status(404).send({ message: "User not found" });
+  }
 });
 
 module.exports = router;

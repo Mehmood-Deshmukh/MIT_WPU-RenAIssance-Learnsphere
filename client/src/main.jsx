@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { BrowserRouter, Routes, Route } from "react-router";
 import Login from "./Pages/Login.jsx";
 import Singup from "./Pages/Signup.jsx";
+import { ToastContainer } from "react-toastify";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -15,5 +16,6 @@ createRoot(document.getElementById("root")).render(
         <Route path="/auth/signup" element={<Singup />} />
       </Routes>
     </BrowserRouter>
+    <ToastContainer />
   </StrictMode>
 );

@@ -21,9 +21,11 @@ const Singup = () => {
     try {
       const response = await axios.post(
         "http://localhost:3000/auth/signup",
-        data
+        data,
+        { withCredentials: true }
       );
       console.log(response.status);
+      sessionStorage.setItem("token", response.data.token);
       if (response.status === 200) {
         navigate("/");
       }
