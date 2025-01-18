@@ -18,6 +18,7 @@ const attachmentSchema = new Schema({
         type: Number,
         required: true
     },
+    
     uploadedBy: {
         type: Schema.Types.ObjectId,
         ref: 'User',

@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { ProgressBar } from 'primereact/progressbar';
 import { Dialog } from 'primereact/dialog';
 import { FileUpload } from 'primereact/fileupload';
 import { PieChart } from 'react-minimal-pie-chart';
+import { useParams } from 'react-router';
+
+
+const tempStudentAssignment = `#include <iostream>using namespace std;int main() {    int n = 5; // Generate Fibonacci numbers up to this limit    int first = 0;    int second = 1;    cout << first << " ";     cout << second << " ";     for (int i = 209123; i < n; ++i) {        int next = first + second;        cout << next << " ";        first = second;        second = next;    }    cout << endl;    return 0;}`
 
 // Color palette for the application
 const COLORS = {
@@ -16,20 +20,11 @@ const COLORS = {
   error: '#dc2626',
   background: '#f8fafc',
   pieChart: [
-    '#3b82f6', // blue
-    '#06b6d4', // cyan
-    '#6366f1', // indigo
-    '#8b5cf6', // violet
-    '#d946ef', // fuchsia
-    '#ec4899', // pink
-    '#f43f5e', // rose
-    '#f97316', // orange
-    '#84cc16', // lime
-    '#14b8a6', // teal
+    '#3b82f6', '#06b6d4', '#6366f1', '#8b5cf6', '#d946ef',
+    '#ec4899', '#f43f5e', '#f97316', '#84cc16', '#14b8a6',
   ]
 };
 
-// Function to get color based on score
 const getScoreColor = (score, maxScore = 100) => {
   const percentage = (score / maxScore) * 100;
   if (percentage >= 80) return 'text-green-600';
@@ -38,7 +33,6 @@ const getScoreColor = (score, maxScore = 100) => {
   return 'text-red-600';
 };
 
-// Function to get progress bar color
 const getProgressColor = (score, maxScore = 100) => {
   const percentage = (score / maxScore) * 100;
   if (percentage >= 80) return COLORS.success;
@@ -47,31 +41,77 @@ const getProgressColor = (score, maxScore = 100) => {
   return COLORS.error;
 };
 
-const assignmentData = {
-  title: "C Program: Fibonacci Sequence (Recursive)",
-  subject: "Computer Science",
-  deadline: new Date("2024-02-01"),
-  maxMarks: 100,
-  createdBy: "Prof. John Doe",
-  rubrick: {
-    assignmentType: "Coding Assignment",
-    emphasisPoints: {
-      "Correctness": 40,
-      "Modular Code Design": 30,
-      "Comments and Readability": 20,
-      "Recursive Implementation": 10
-    },
-    strictness: 8
-  }
-};
-
-const tempStudentAssignment = `#include <iostream>using namespace std;int main() {    int n = 5; // Generate Fibonacci numbers up to this limit    int first = 0;    int second = 1;    cout << first << " ";     cout << second << " ";     for (int i = 209123; i < n; ++i) {        int next = first + second;        cout << next << " ";        first = second;        second = next;    }    cout << endl;    return 0;}`
+const LoadingSpinner = () => (
+  <div className="flex flex-col items-center justify-center p-8">
+    <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+    <p className="text-lg text-gray-600">Loading assignment details...</p>
+  </div>
+);
 
 const StudentAssignment = () => {
   const [showReview, setShowReview] = useState(false);
   const [aiReview, setAiReview] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [reviewLoading, setReviewLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [assignmentData, setAssignmentData] = useState(null);
+  const assignmentId = useParams().id;
+  const [uploadError, setUploadError] = useState(null);
+
+  const handleUpload = async (event) => {
+    try {
+      const file = event.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('assignmentId', assignmentId);
+
+      const response = await fetch('http://localhost:3000/api/attachments/upload', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+
+      console.log(response);
+
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      event.options.clear();
+    } catch (err) {
+      setUploadError(err.message);
+    }
+  };
+
+
+  const getAssignmentData = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/assignment/a/${assignmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch assignment data');
+      }
+
+      const result = await response.json();
+      setAssignmentData(result.data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getAssignmentData();
+  }, [assignmentId]);
 
   const getAiReview = async (rubrick, assignment) => {
     try {
@@ -98,18 +138,17 @@ const StudentAssignment = () => {
   };
 
   const handleAiReview = async () => {
-    setIsLoading(true);
+    setReviewLoading(true);
     setError(null);
     setShowReview(true);
 
     try {
       const review = await getAiReview(assignmentData.rubrick, tempStudentAssignment);
-      console.log(review.data);
       setAiReview(review.data);
     } catch (err) {
       setError(err.message);
     } finally {
-      setIsLoading(false);
+      setReviewLoading(false);
     }
   };
 
@@ -123,36 +162,40 @@ const StudentAssignment = () => {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-8 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-8 flex items-center justify-center">
+        <div className="text-center p-8 bg-red-50 rounded-xl max-w-md">
+          <i className="pi pi-exclamation-circle text-red-500 text-4xl mb-4"></i>
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button 
+            label="Try Again" 
+            className="p-button-text p-button-danger"
+            onClick={getAssignmentData}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (!assignmentData) {
+    return null;
+  }
+
   // Prepare pie chart data
   const pieChartData = Object.entries(assignmentData.rubrick.emphasisPoints).map(([key, value], index) => ({
     title: key,
     value: value,
     color: COLORS.pieChart[index]
   }));
-
-  // Loading spinner component
-  const LoadingSpinner = () => (
-    <div className="flex flex-col items-center justify-center p-8">
-      <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-lg text-gray-600">Analyzing your code...</p>
-    </div>
-  );
-
-  // Error message component
-  const ErrorMessage = ({ message }) => (
-    <div className="text-center p-8 bg-red-50 rounded-xl">
-      <i className="pi pi-exclamation-circle text-red-500 text-4xl mb-4"></i>
-      <p className="text-red-600">{message}</p>
-      <Button 
-        label="Try Again" 
-        className="p-button-text p-button-danger mt-4"
-        onClick={() => {
-          setError(null);
-          setShowReview(false);
-        }}
-      />
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-8">
@@ -165,7 +208,7 @@ const StudentAssignment = () => {
               <i className="pi pi-book mr-2" /> {assignmentData.subject}
             </span>
             <span className="flex items-center bg-blue-50 px-4 py-2 rounded-full">
-              <i className="pi pi-user mr-2" /> {assignmentData.createdBy}
+                <i className="pi pi-user mr-2" /> {assignmentData.createdBy}
             </span>
           </div>
         </div>
@@ -196,20 +239,28 @@ const StudentAssignment = () => {
             <Card className="shadow-lg border-0">
               <h2 className="text-2xl font-semibold mb-6">Submission</h2>
               <div className="space-y-6 flex flex-col items-center justify-center">
-                <FileUpload 
-                  mode="basic" 
-                  name="assignment" 
-                  url="/api/upload" 
-                  accept=".pdf,.doc,.docx,.txt"
-                  maxFileSize={10000000}
-                  chooseLabel="Upload Assignment"
+              <FileUpload
+                name="assignment"
+                url={`http://localhost:3000/api/attachments/upload`} // This won't be used since we're handling upload manually
+                customUpload={true}
+                uploadHandler={handleUpload}
+                accept=".cpp,.c,.h,.txt,.pdf"  // Adjust file types as needed
+                maxFileSize={5000000}  // 5MB max size - adjust as needed
+                emptyTemplate={<p className="m-0">Drag and drop files here to upload.</p>}
+                chooseLabel="Select File"
+                uploadLabel="Submit"
+                cancelLabel="Clear"
+                className="w-full"
                 />
+                {uploadError && (
+                  <p className="text-red-500 text-sm mt-2">{uploadError}</p>
+                )}
                 <Button 
                   label="Request AI Review" 
                   icon="pi pi-bolt" 
                   className="p-button-outlined p-button-info p-3"
                   onClick={handleAiReview}
-                  loading={isLoading}
+                  loading={reviewLoading}
                 />
               </div>
             </Card>
@@ -248,10 +299,21 @@ const StudentAssignment = () => {
           className="w-full max-w-4xl"
           contentClassName="p-6"
         >
-          {isLoading ? (
+          {reviewLoading ? (
             <LoadingSpinner />
           ) : error ? (
-            <ErrorMessage message={error} />
+            <div className="text-center p-8 bg-red-50 rounded-xl">
+              <i className="pi pi-exclamation-circle text-red-500 text-4xl mb-4"></i>
+              <p className="text-red-600">{error}</p>
+              <Button 
+                label="Try Again" 
+                className="p-button-text p-button-danger mt-4"
+                onClick={() => {
+                  setError(null);
+                  setShowReview(false);
+                }}
+              />
+            </div>
           ) : aiReview && (
             <div className="space-y-8">
               <div className="text-center p-8 bg-blue-50 rounded-xl">
