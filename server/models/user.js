@@ -34,6 +34,17 @@ const userSchema = new Schema({
 		required: true,
 	},
 	assignment: {},
+
+	// following fields are only for teacher
+	subjects: {
+		type: [String],
+		required: function () {
+			return this.role === "teacher";
+		},
+	},
+
+	
+
 });
 
 module.exports = mongoose.model("User", userSchema);
