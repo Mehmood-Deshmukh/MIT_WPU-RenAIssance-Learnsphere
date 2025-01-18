@@ -1,4 +1,4 @@
-const userModel = require("../../models/user");
+const userModel = require("../../models/userModel");
 const jwt = require("jsonwebtoken");
 const { loginSchema, signUpSchema } = require("./Validation");
 const { hashPassword, matchPassword } = require("../../utils/password");

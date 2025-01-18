@@ -11,10 +11,11 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 
 const { connectDB } = require("./config/db");
+const requestRoutes = require("./routes/request");
 
 app.use(cors({ credentials: true, origin: true }));
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json({ extended: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,6 +38,8 @@ app.listen(process.env.PORT, () => {
 
 app.use("/api/attachments", attachmentRoutes);
 app.use("/auth", userAuthRoutes);
+app.use("/api/assignment", assignmentRoutes);
+app.use("/api/request", requestRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome");

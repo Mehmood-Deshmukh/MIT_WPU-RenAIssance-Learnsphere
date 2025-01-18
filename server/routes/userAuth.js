@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const userModel = require("../models/user");
+const userModel = require("../models/userModel");
 const {
   loginUser,
   signUpUser,
 } = require("../controllers/userController/UserAuth");
-const authenticateUser = require("../middlewares/authenticateUser.js");
+const authenticateUser = require("../middlewares/authenticateUser");
+
 
 router.route("/login").post(loginUser);
 router.route("/signup").post(signUpUser);
