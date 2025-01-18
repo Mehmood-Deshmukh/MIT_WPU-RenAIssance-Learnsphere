@@ -4,6 +4,8 @@ const app = express();
 const userAuthRoutes = require("./routes/userAuth");
 const attachmentRoutes = require("./routes/attachmentRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
+const adminRoutes = require("./routes/admin");
+
 const cors = require("cors");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
@@ -40,6 +42,7 @@ app.use("/api/attachments", attachmentRoutes);
 app.use("/auth", userAuthRoutes);
 app.use("/api/assignment", assignmentRoutes);
 app.use("/api/request", requestRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome");

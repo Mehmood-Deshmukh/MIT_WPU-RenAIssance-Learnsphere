@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Course = require("./courseModel");
+const User = require("./userModel");
 
 const requestSchema = new Schema({
     type: {
@@ -12,6 +13,11 @@ const requestSchema = new Schema({
         type: String,
         enum: ["PENDING", "APPROVED", "REJECTED"],
         default: "PENDING",
+    },
+    requestedBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
     },
     requestedTo: {
         type: String,
@@ -29,11 +35,6 @@ const requestSchema = new Schema({
 });
 
 const courseCreationRequestSchema = new Schema({
-    requestedBy: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-    },
     course: {
         type: Schema.Types.ObjectId,
         ref: "Course",
@@ -50,11 +51,6 @@ const teacherSignupRequestSchema = new Schema({
 });
 
 const courseEnrollmentRequestSchema = new Schema({
-    requestedBy: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-    },
     course: {
         type: Schema.Types.ObjectId,
         ref: "Course",
@@ -105,13 +101,13 @@ Request.approveRequest = async function (requestId, feedback) {
     request.feedback = feedback;
     await request.save();
 
-    if (request.__t === "CourseCreationRequest") {
+    if (request.type === "COURSE_CREATION") {
         const course = await Course.findById(request.course);
         course.instructors.push(request.requestedBy);
         await course.save();
     }
 
-    if (request.__t === "TeacherSignupRequest") {
+    if (request.type === "TEACHER_SIGNUP") {
         const user = await User.findById(request.requestedBy);
         if (!user) {
             throw new Error("User Not Found");
