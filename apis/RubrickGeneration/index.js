@@ -35,8 +35,12 @@ async function callApi(textInput) {
 
    try {
       const response = await fetch(url, requestOptions);
+      
       const result = await response.json();
-      return result;
+      const content = result.content.replace(/```json\n/g, '').replace(/```\n/g, '');
+      const jsonContent = JSON.parse(content);
+      console.log(jsonContent)
+      return jsonContent;
    } catch (error) {
       console.error('Error:', error);
       throw error;
@@ -53,7 +57,7 @@ app.post('/chat', async (req, res) => {
       const userInput = req.body.prompt;
       console.log(userInput);
       const result = await callApi(userInput);
-      return res.status(200).json(result.content);
+      return res.status(200).json(result);
    } catch (error) {
       console.error('Error:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
