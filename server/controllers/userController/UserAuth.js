@@ -1,11 +1,13 @@
-const userModel = require("../models/user");
+const userModel = require("../../models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { loginSchema, signUpSchema } = require("./Validation");
 const saltRounds = 10;
 
-const createToken = (id) => {
-  return jwt.sign({ id }, process.env.JWTSECRET, { expiresIn: 24 * 60 * 60 });
+const createToken = (id, role) => {
+  return jwt.sign({ id, role }, process.env.JWTSECRET, {
+    expiresIn: 24 * 60 * 60,
+  });
 };
 
 const hashPassword = async (password) => {
@@ -31,10 +33,8 @@ const matchPassword = async (password, hashed_password) => {
 const signUpUser = async (req, res) => {
   try {
     const { error } = signUpSchema.validate(req.body);
-    if (error) {
-      console.log(error);
+    if (error)
       return res.status(400).json({ message: "Schema Validation Failed" });
-    }
 
     const existingUser = await userModel.findOne({ email: req.body.email });
     if (existingUser) {
@@ -48,9 +48,11 @@ const signUpUser = async (req, res) => {
       email: req.body.email,
       password: hash,
       rollNumber: req.body.rollNumber,
+      role: req.body.role ? req.body.role : "student",
     });
+
     const savedUser = await newUser.save();
-    const token = createToken(savedUser._id);
+    const token = createToken(savedUser._id, savedUser.role);
 
     res.cookie("token", token, {
       path: "/", // Accessible across the app
@@ -79,12 +81,11 @@ const loginUser = async (req, res) => {
     const existingUser = await userModel.findOne({ email: req.body.email });
     if (!existingUser) return res.status(404).send("User Not Found");
     const password = req.body.password;
-    // console.log(password);
     const result = await matchPassword(password, existingUser.password);
     if (!existingUser || !result) {
       return res.status(409).json({ message: "Invalid Credentials" });
     }
-    const token = createToken(existingUser._id);
+    const token = createToken(existingUser._id, existingUser.role);
     res.cookie("token", token, {
       path: "/", // Accessible across the app
       httpOnly: false, // Prevent client-side access
@@ -92,6 +93,7 @@ const loginUser = async (req, res) => {
       sameSite: "Lax", // Allow basic cross-origin
       expires: new Date(Date.now() + 28800000), // Cookie will be removed after 8 hours
     });
+
     console.log("Logged IN!");
     res.json(existingUser);
   } catch (err) {
@@ -100,7 +102,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-const authenticateUser = (req, res, next) => {
+const authenticateUser = async (req, res, next) => {
   var token = req.headers?.cookie; // Safely access the token
 
   if (!token) {
@@ -118,10 +120,8 @@ const authenticateUser = (req, res, next) => {
 
     const verifiedUser = jwt.verify(token, process.env.JWTSECRET);
     req.user = verifiedUser;
-
     next();
   } catch (err) {
-    console.log(err);
     return res.status(403).json({ message: "Invalid Token" });
   }
 };

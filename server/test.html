@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        #uploadButton {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #uploadButton:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #preview {
+            margin-top: 20px;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Upload Test</h1>
+    
+    <div class="form-group">
+        <label for="token">JWT Token:</label>
+        <input type="text" id="token" style="width: 100%;">
+    </div>
+
+    <div class="form-group">
+        <label for="assignmentId">Assignment ID:</label>
+        <input type="text" id="assignmentId" value="678b37bb754418ecc634c665" style="width: 100%;">
+    </div>
+
+    <div class="form-group">
+        <label for="file">Select File:</label>
+        <input type="file" id="file">
+    </div>
+
+    <button id="uploadButton" onclick="uploadFile()">Upload File</button>
+
+    <div id="status" class="status" style="display: none;"></div>
+    <div id="preview"></div>
+
+    <script>
+        async function uploadFile() {
+            const token = document.getElementById('token').value;
+            const assignmentId = document.getElementById('assignmentId').value;
+            const fileInput = document.getElementById('file');
+            const statusDiv = document.getElementById('status');
+            const uploadButton = document.getElementById('uploadButton');
+
+            if (!token) {
+                showStatus('Please enter a JWT token', 'error');
+                return;
+            }
+
+            if (!assignmentId) {
+                showStatus('Please enter an assignment ID', 'error');
+                return;
+            }
+
+            if (!fileInput.files[0]) {
+                showStatus('Please select a file', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('files', fileInput.files[0]);
+            formData.append('assignmentId', assignmentId);
+
+            uploadButton.disabled = true;
+            showStatus('Uploading...', '');
+
+            try {
+
+                const response = await fetch('http://localhost:3000/api/attachments/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('File uploaded successfully! File ID: ' + data.file.id, 'success');
+                    // Preview file details
+                    document.getElementById('preview').innerHTML = `
+                        <h3>File Details:</h3>
+                        <p>Filename: ${data.file.filename}</p>
+                        <p>Size: ${formatFileSize(data.file.size)}</p>
+                        <p>Upload Date: ${new Date(data.file.uploadDate).toLocaleString()}</p>
+                        <p>Content Type: ${data.file.contentType}</p>
+                    `;
+                } else {
+                    showStatus('Upload failed: ' + (data.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            } finally {
+                uploadButton.disabled = false;
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'status ' + type;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
