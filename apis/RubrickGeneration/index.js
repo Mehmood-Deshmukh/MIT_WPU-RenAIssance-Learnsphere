@@ -31,19 +31,19 @@ async function callApi(textInput) {
       body: JSON.stringify(raw),
       redirect: 'follow',
    };
-
+   
+   const response = await fetch(url, requestOptions);
+   
+   const result = await response.json();
+   const content = result.content.replace(/```json\n/g, '').replace(/```\n/g, '');
    try {
-      const response = await fetch(url, requestOptions);
-      
-      const result = await response.json();
-      const content = result.content.replace(/```json\n/g, '').replace(/```\n/g, '');
       console.log(content)
       const jsonContent = JSON.parse(content);
       console.log(jsonContent)
       return jsonContent;
    } catch (error) {
-      console.error('Error:', error);
-      throw error;
+      // return "Error generating rubrick"
+      return content
    }
 }
 
