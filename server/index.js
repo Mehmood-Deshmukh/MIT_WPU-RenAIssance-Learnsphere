@@ -11,9 +11,6 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 
 const { connectDB } = require("./config/db");
-
-
-const assignmentRoutes = require("./routes/assignment");
 const requestRoutes = require("./routes/request");
 
 app.use(cors({ credentials: true, origin: true }));
