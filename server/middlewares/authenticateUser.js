@@ -1,26 +1,31 @@
+const jwt = require("jsonwebtoken");
+
 const authenticateUser = (req, res, next) => {
-	var token = req.headers?.cookie; // Safely access the token
+  var token = req.headers?.authorization; // Safely access the token
 
-	if (!token) {
-		return res.status(401).send("Access Denied: No Token Provided");
-	}
+  if (!token) {
+    return res.status(401).send("Access Denied: No Token Provided");
+  }
 
-	try {
-		const token = req.headers.cookie
-			.split("; ")
-			.find((item) => item.startsWith("token="))
-			?.split("=")[1];
-		if (!token) {
-			return res.status(401).json({ message: "Access Denied: Token Missing" });
-		}
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
 
-		const verifiedUser = jwt.verify(token, process.env.SECRET_HASH_STRING);
-		req.user = verifiedUser;
+    if (!token) {
+      return res.status(401).json({ message: "Access Denied: Token Missing" });
+    }
 
-		next();
-	} catch (err) {
-		return res.status(403).json({ message: "Invalid Token" });
-	}
+    jwt.verify(token, process.env.JWTSECRET, (err, decoded) => {
+      if (err) {
+        console.log(err?.message);
+        return res.status(400).json({ message: err?.message });
+      }
+      req.user = decoded;
+    });
+    next();
+  } catch (err) {
+    console.log(err?.message);
+    return res.status(403).json({ message: "Invalid Token" });
+  }
 };
 
 module.exports = authenticateUser;
