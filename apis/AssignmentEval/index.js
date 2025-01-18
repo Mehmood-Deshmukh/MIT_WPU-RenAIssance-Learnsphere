@@ -12,8 +12,19 @@ const model_context = `You are an expert evaluator responsible for scoring assig
   "suggestions": ["string (constructive feedback for each emphasis point in the rubric)", "...additional suggestions as necessary..."]
 }
 
+Rubrick format is as follows:
+
+{
+  "assignmentTitle": "Title",
+  "description": "A short description of the assignment",
+  "assignmentType": "string (type of assignment, e.g., 'Essay', 'Research Paper', 'Report')",
+  "markingScheme": "string (grading system, e.g., '100 points')",
+  "emphasisPoints": {"key (string)": "value (integer, points allocated for each emphasis area)", "...additional keys as needed..."}
+  "strictness": "integer"
+}
+
 ### Rules for Evaluation:
-1. **Understand the Rubric**: Use the criteria and weighting in the "emphasisPoints" field of the rubric to assess the assignment. Ensure the evaluation aligns with the total points specified in "markingScheme".
+1. **Understand the Rubric**: Use the criteria and weighting in the "emphasisPoints" field of the rubric to assess the assignment keeping the strictness level in mind. Ensure the evaluation aligns with the total points specified in "markingScheme".
 2. **Assign Scores**: Break the total score into individual scores for each criterion in the "emphasisPoints" field, based
 `
 
@@ -70,10 +81,9 @@ app.post('/get-eval', async (req, res) => {
     const modelInput = "Rubrick : \n" + rubrick + "Assignment : \n" + assignment
       console.log(modelInput);
       const result = await callApi(modelInput);
-      return res.status(200).json(result);
+      return res.status(200).json({message : "Success", data : result});
    } catch (error) {
-      console.error('Error:', error);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      return res.status(500).json({ message: 'Internal Server Error', data : null });
    }
 });
 

@@ -57,10 +57,10 @@ app.post('/chat', async (req, res) => {
       const userInput = req.body.prompt;
       console.log(userInput);
       const result = await callApi(userInput);
-      return res.status(200).json(result);
+      return res.status(200).json({message : "Success", data : result});
    } catch (error) {
       console.error('Error:', error);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      return res.status(500).json({ message : 'Internal Server Error', data : null});
    }
 });
 
