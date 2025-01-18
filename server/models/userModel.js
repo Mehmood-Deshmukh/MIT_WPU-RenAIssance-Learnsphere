@@ -32,6 +32,7 @@ const userSchema = new Schema({
   rollNumber: {
     type: Number,
     required: true,
+    unique: true,
   },
   assignment: {},
 
