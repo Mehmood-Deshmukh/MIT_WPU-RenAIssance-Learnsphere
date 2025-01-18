@@ -1,33 +1,12 @@
-const userModel = require("../../models/user");
+const userModel = require("../../models/userModel");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 const { loginSchema, signUpSchema } = require("./Validation");
-const saltRounds = 10;
+const { hashPassword, matchPassword } = require("../../utils/password");
 
 const createToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWTSECRET, {
     expiresIn: 24 * 60 * 60,
   });
-};
-
-const hashPassword = async (password) => {
-  try {
-    const hash = await bcrypt.hash(password, saltRounds);
-    if (!hash) return;
-    return hash;
-  } catch (err) {
-    console.log(err);
-    return;
-  }
-};
-const matchPassword = async (password, hashed_password) => {
-  try {
-    const result = await bcrypt.compare(password, hashed_password);
-    return result;
-  } catch (err) {
-    console.log("Invalid Password");
-    return false;
-  }
 };
 
 const signUpUser = async (req, res) => {
@@ -95,35 +74,11 @@ const loginUser = async (req, res) => {
     });
 
     console.log("Logged IN!");
-    res.json(existingUser);
+    res.json({ user: existingUser, token });
   } catch (err) {
     console.log(err);
     res.status(401).json({ message: "An Error Occured please try again" });
   }
 };
 
-const authenticateUser = async (req, res, next) => {
-  var token = req.headers?.cookie; // Safely access the token
-
-  if (!token) {
-    return res.status(401).send("Access Denied: No Token Provided");
-  }
-
-  try {
-    const token = req.headers.cookie
-      .split("; ")
-      .find((item) => item.startsWith("token="))
-      ?.split("=")[1];
-    if (!token) {
-      return res.status(401).json({ message: "Access Denied: Token Missing" });
-    }
-
-    const verifiedUser = jwt.verify(token, process.env.JWTSECRET);
-    req.user = verifiedUser;
-    next();
-  } catch (err) {
-    return res.status(403).json({ message: "Invalid Token" });
-  }
-};
-
-module.exports = { loginUser, signUpUser, authenticateUser };
+module.exports = { loginUser, signUpUser };
