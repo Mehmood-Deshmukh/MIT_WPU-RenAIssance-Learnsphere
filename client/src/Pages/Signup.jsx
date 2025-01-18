@@ -8,6 +8,7 @@ const Singup = () => {
   const [name, setName] = useState("");
   const [rollNumber, setrollNumber] = useState("");
   const navigate = useNavigate();
+  const [userRole, setUserRole] = useState("student");
   const handleSubmit = async (evt) => {
     evt.preventDefault();
 
