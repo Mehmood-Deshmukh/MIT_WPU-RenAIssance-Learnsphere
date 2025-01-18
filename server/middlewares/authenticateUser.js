@@ -23,8 +23,6 @@ const authenticateUser = (req, res, next) => {
 			req.user = decoded;
 			next();
 		});
-
-		next();
 	} catch (err) {
 		console.log(err?.message);
 		return res.status(403).json({ message: "Invalid Token" });

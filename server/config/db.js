@@ -1,8 +1,5 @@
 const mongoose = require('mongoose');
-const Grid = require('gridfs-stream');
-const { GridFsStorage } = require('multer-gridfs-storage');
 
-let gfs;
 
 const connectDB = async () => {
     try {
