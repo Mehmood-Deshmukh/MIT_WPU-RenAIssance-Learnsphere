@@ -9,16 +9,11 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
-import ViewEnrollmentRequest from "./ViewEnrollmentRequest";
+import ViewEnrollmentRequest from "../components/ViewEnrollmentRequest";
 
-const TeacherDashboard = () => {
+const TeacherDashboardCourse = () => {
   const [showModal, setShowModal] = useState(false);
-  const [showReqCourseModel, setShowReqCourseModel] = useState(false);
   const [viewEnrollmentForm, setviewEnrollmentForm] = useState(false);
-  const [newCourse, setNewCourse] = useState({
-    title: "",
-    description: "",
-  });
   const [newAssignment, setNewAssignment] = useState({
     title: "",
     description: "",
@@ -65,7 +60,6 @@ const TeacherDashboard = () => {
         icon="pi pi-times"
         onClick={() => {
           setShowModal(false);
-          setShowReqCourseModel(false);
         }}
         className="p-button-text"
       />
@@ -89,13 +83,6 @@ const TeacherDashboard = () => {
             />
           </div>
           <div className="md:flex flex-col justify-between items-end hidden ">
-            <Button
-              label="Request New Course"
-              icon="pi pi-user"
-              severity="secondary"
-              className="p-2 m-3"
-              onClick={() => setShowReqCourseModel(true)}
-            />
             <Button
               label="View Enrollment Requests"
               icon="pi pi-eye"
@@ -209,40 +196,7 @@ const TeacherDashboard = () => {
         </div>
       </Dialog>
       {/* Request Course Dialog */}
-      <Dialog
-        header="Request New Course"
-        visible={showReqCourseModel}
-        className="w-[95vw] sm:w-[80vw] lg:w-[50vw]"
-        footer={footer}
-        onHide={() => setShowReqCourseModel(false)}
-      >
-        <div className="p-fluid">
-          <div className="p-field mb-3">
-            <label htmlFor="title">Course Title</label>
-            <InputText
-              id="title"
-              value={newCourse.title}
-              onChange={(e) =>
-                setNewCourse({ ...newCourse, title: e.target.value })
-              }
-            />
-          </div>
-          <div className="p-field mb-3">
-            <label htmlFor="description">Description</label>
-            <InputTextarea
-              id="description"
-              value={newCourse.description}
-              onChange={(e) =>
-                setNewAssignment({
-                  ...newCourse,
-                  description: e.target.value,
-                })
-              }
-              rows={3}
-            />
-          </div>
-        </div>
-      </Dialog>
+
       <div>
         <ViewEnrollmentRequest
           visible={viewEnrollmentForm}
@@ -253,4 +207,4 @@ const TeacherDashboard = () => {
   );
 };
 
-export default TeacherDashboard;
+export default TeacherDashboardCourse;

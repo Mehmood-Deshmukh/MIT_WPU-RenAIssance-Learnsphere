@@ -1,9 +1,9 @@
-import React from "react";
 import { Routes, Route } from "react-router";
 import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Singup from "./Pages/Signup";
-import TeacherDashboard from "./components/TeacherDashboard";
+import TeacherDashboardCourse from "./Pages/TeacherDashboardCourse";
+import TeacherDashboardMain from "./Pages/TeacherDashboardMain";
 // import ViewEnrollmentRequest from "./components/ViewEnrollmentRequest";
 
 const App = () => {
@@ -15,8 +15,9 @@ const App = () => {
         <Route path="/auth/signup" element={<Singup />} />
         <Route
           path="/teacherdashboard/:courseid"
-          element={<TeacherDashboard />}
+          element={<TeacherDashboardCourse />}
         />
+        <Route path="/teacher-dashboard" element={<TeacherDashboardMain />} />
       </Routes>
     </>
   );

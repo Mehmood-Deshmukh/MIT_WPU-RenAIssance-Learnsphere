@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 // import { useState } from "react";
-import { Button } from "primereact/button";
 import Timepass from "../components/Timepass";
 
 const Singup = () => {
