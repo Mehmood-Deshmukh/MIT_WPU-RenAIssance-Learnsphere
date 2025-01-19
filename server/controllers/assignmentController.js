@@ -134,4 +134,5 @@ const getPendingAssignments = async (req, res) => {
 
 
 
-module.exports = { createAssignment, getAssignments, getAssignmentById, updateAssignment, deleteAssignment, getPendingAssignments };
+
+module.exports = { createAssignment, getAssignments, getAssignmentById, updateAssignment, deleteAssignment, getPendingAssignments  };

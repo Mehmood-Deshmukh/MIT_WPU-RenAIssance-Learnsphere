@@ -136,7 +136,6 @@ async function evaluateAssignment(textInput) {
       const result = await response.json();
       const content = result.content.replace(/```json\n/g, '').replace(/```\n/g, '');
       const jsonContent = JSON.parse(content);
-      console.log(jsonContent)
       return jsonContent;
    } catch (error) {
       console.error('Error:', error);
@@ -154,7 +153,6 @@ app.post('/get-eval', async (req, res) => {
     
 
       const modelInput = "Rubrick: " + rubrick + " Assignment: " + assignment
-      console.log(modelInput);
       if(rubrick && assignment) {
       const result = await evaluateAssignment(modelInput);
       return res.status(200).json({ message: "Success", data: result });

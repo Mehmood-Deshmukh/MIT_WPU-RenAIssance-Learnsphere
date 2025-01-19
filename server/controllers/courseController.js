@@ -1,5 +1,6 @@
 const Course = require("../models/courseModel");
 const Request = require("../models/requestSchema");
+const userModel = require("../models/userModel");
 
 const isCourseApproved = async (req, res, next) => {
     try{
@@ -114,6 +115,17 @@ const getCourseAssignments = async (req, res) => {
     }
 }
 
+const getAllCourses = async (req, res) => {
+    try{
+        const courseIds = await userModel.findById(req.user.id).populate('courses');
+        const courses = await Course.find({ _id: { $in: courseIds } });
+
+        res.json({ message: "success", data: courses });
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+}
+
 // rememeber to check is isApproved field of course is true or not
 module.exports = {
     isCourseApproved,
@@ -123,4 +135,5 @@ module.exports = {
     getEnrollmentRequests,
     approveEnrollmentRequest,
     getCourseAssignments,
+    getAllCourses
 }
