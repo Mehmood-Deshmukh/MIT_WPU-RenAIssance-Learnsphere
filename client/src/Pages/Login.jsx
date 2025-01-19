@@ -27,7 +27,11 @@ const Login = () => {
 			if (response.status === 200) {
 				localStorage.setItem("token", response.data.token);
 				dispatch({ type: "LOGIN", payload: response.data });
-				navigate("/home");
+				if(response.data.role === "teacher"){
+					navigate("/teacher-dashboard");
+				}else{
+					navigate("/studentDashboard");
+				}
 			}
 		} catch (err) {
 			console.log(err);
