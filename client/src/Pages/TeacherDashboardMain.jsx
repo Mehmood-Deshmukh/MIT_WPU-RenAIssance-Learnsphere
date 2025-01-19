@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { Avatar } from "primereact/avatar";
 import { DataView } from "primereact/dataview";
@@ -8,11 +8,84 @@ import { ProgressBar } from "primereact/progressbar";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import useAuthContext from "../hooks/useAuthContext";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const TeacherDashboardMain = () => {
+  const { state } = useAuthContext();
+  const navigate = useNavigate();
+  const [courses, setCourses] = useState([]);
+  const [newCourse, setNewCourse] = useState({
+    title: "",
+    description: "",
+  });
+  const [showReqCourseModel, setShowReqCourseModel] = useState(false);
+
+  useEffect(() => {
+    const getTeacherCourses = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/course/instructor/${currentUser._id}`,
+          {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log(response.data);
+        setCourses([...courses, ...response.data.data]);
+      } catch (error) {
+        console.log(error);
+        toast.error(error.response.data.message);
+      }
+    };
+    getTeacherCourses();
+  }, []);
+
+  const handleNewCourseRequest = async () => {
+    const data = {
+      title: newCourse.title,
+      description: newCourse.description,
+      createdBy: currentUser._id,
+      instructors: [],
+    };
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/course/create",
+        data,
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      if (response.status === 200) {
+        Swal.fire({ title: "Course Requested Successfully", icon: "success" });
+        setShowReqCourseModel(false);
+        setCourses([...courses, response.data.data]);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+      setShowReqCourseModel(false);
+    }
+  };
+
+  if (!state || !state.user || state.user.role !== "teacher") {
+    return navigate("/login");
+  }
+  const currentUser = state?.user;
+
   const footer = (
     <div>
-      <Button label="Create" icon="pi pi-check" />
+      <Button
+        label="Create"
+        icon="pi pi-check"
+        onClick={handleNewCourseRequest}
+      />
       <Button
         label="Cancel"
         icon="pi pi-times"
@@ -23,11 +96,10 @@ const TeacherDashboardMain = () => {
       />
     </div>
   );
-  const [newCourse, setNewCourse] = useState({
-    title: "",
-    description: "",
-  });
-  const [showReqCourseModel, setShowReqCourseModel] = useState(false);
+
+  const profileImage = `https://avatar.iran.liara.run/username?username=${
+    currentUser.Name.split()[0]
+  }+${currentUser.Name.split()[1]}`;
 
   // Sample teacher data - in real app, this would come from API/props
   const [teacherData] = useState({
@@ -37,7 +109,6 @@ const TeacherDashboardMain = () => {
     department: "Computer Science",
     joinDate: "2023-09-01",
     expertise: ["Web Development", "Data Structures", "Machine Learning"],
-    profileImage: "https://via.placeholder.com/150",
     stats: {
       totalStudents: 245,
       averageRating: 4.8,
@@ -47,41 +118,6 @@ const TeacherDashboardMain = () => {
   });
 
   // Sample courses data
-  const [courses] = useState([
-    {
-      id: 1,
-      name: "Advanced Web Development",
-      code: "CS401",
-      schedule: "Mon, Wed 10:00 AM",
-      enrolled: 45,
-      maxCapacity: 50,
-      status: "active",
-      progress: 65,
-      nextClass: "2025-01-20T10:00:00",
-    },
-    {
-      id: 2,
-      name: "Data Structures and Algorithms",
-      code: "CS301",
-      schedule: "Tue, Thu 2:00 PM",
-      enrolled: 38,
-      maxCapacity: 40,
-      status: "active",
-      progress: 45,
-      nextClass: "2025-01-21T14:00:00",
-    },
-    {
-      id: 3,
-      name: "Introduction to Machine Learning",
-      code: "CS501",
-      schedule: "Wed, Fri 1:00 PM",
-      enrolled: 35,
-      maxCapacity: 35,
-      status: "upcoming",
-      progress: 0,
-      nextClass: "2025-01-22T13:00:00",
-    },
-  ]);
 
   const getStatusSeverity = (status) => {
     switch (status) {
@@ -103,32 +139,33 @@ const TeacherDashboardMain = () => {
           <div className="flex flex-column h-full">
             <div className="flex justify-content-between align-items-center">
               <h3 className="text-xl font-bold m-0">{course.name}</h3>
-              <Tag
+              {/* <Tag
                 severity={getStatusSeverity(course.status)}
-                value={course.status.toUpperCase()}
-              />
+                value={course.status?.toUpperCase()}
+              /> */}
             </div>
-
             <div className="my-3">
               <p className="m-0">
-                <strong>Course Code:</strong> {course.code}
+                <strong>Course Title: {course.title}</strong>
               </p>
               <p className="m-0">
-                <strong>Schedule:</strong> {course.schedule}
+                <strong>
+                  Description: {course.description.substring(0, 20)}....
+                </strong>
               </p>
               <p className="m-0">
-                <strong>Enrollment:</strong> {course.enrolled}/
-                {course.maxCapacity}
+                <strong>No of Students: {course.students.length}</strong>
               </p>
-            </div>
-
-            <div className="mt-3">
-              <label className="block mb-2">Course Progress</label>
-              <ProgressBar
-                value={course.progress}
-                showValue
-                style={{ height: "20px" }}
-              />
+              <p className="m-0">
+                <strong>
+                  Course Status :{" "}
+                  {course.isApproved ? (
+                    <span className="text-green-700">Ongoing</span>
+                  ) : (
+                    <span className="text-orange-500">Pending Approval</span>
+                  )}
+                </strong>
+              </p>
             </div>
 
             <div className="mt-auto pt-3">
@@ -151,48 +188,35 @@ const TeacherDashboardMain = () => {
           <div className="col-12 md:col-4">
             <div className="flex flex-column align-items-center">
               <Avatar
-                image={teacherData.profileImage}
+                image={profileImage}
                 size="xlarge"
                 shape="circle"
                 className="mb-3"
               />
-              <h2 className="m-0 text-2xl font-bold">{teacherData.name}</h2>
-              <p className="text-500">{teacherData.department}</p>
+              <h2 className="m-0 text-2xl font-bold">{currentUser.Name}</h2>
+              <p className="text-500">{currentUser.role.toUpperCase()}</p>
             </div>
           </div>
 
-          <div className="col-12 md:col-8">
+          <div className="col-12 md:col-8 flex flex-col justify-center gap-3">
             <div className="grid">
               <div className="col-12">
                 <h3>Personal Information</h3>
                 <div className="grid">
                   <div className="col-12 md:col-6">
                     <p>
-                      <strong>Email:</strong> {teacherData.email}
+                      <strong>Email:</strong> {currentUser.email}
                     </p>
                     <p>
-                      <strong>Department:</strong> {teacherData.department}
+                      <strong>MIS No :</strong> {currentUser.rollNumber}
                     </p>
                   </div>
                   <div className="col-12 md:col-6">
-                    <p>
-                      <strong>Total Students:</strong>{" "}
-                      {teacherData.stats.totalStudents}
-                    </p>
                     <p>
                       <strong>Active Courses:</strong>{" "}
                       {teacherData.stats.coursesCount}
                     </p>
                   </div>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <h3>Expertise</h3>
-                <div className="flex flex-wrap gap-2">
-                  {teacherData.expertise.map((skill, index) => (
-                    <Tag key={index} value={skill} />
-                  ))}
                 </div>
               </div>
             </div>
@@ -203,7 +227,7 @@ const TeacherDashboardMain = () => {
       {/* Courses Section */}
       <Card>
         <div className="flex justify-content-between align-items-center mb-4">
-          <h2 className="m-0">My Courses</h2>
+          <h2 className="m-0 text-xl font-semibold">My Courses</h2>
           <Button
             label="Request New Course"
             icon="pi pi-user"
