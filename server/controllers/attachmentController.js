@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Assignment = require('../models/assignmentModel');
 const Attachment = require('../models/attachmentModel');
+const User = require('../models/userModel');
+const pdfParse = require('pdf-parse');
+const reviewModel = require('../models/reviewModel');
 
 const fileController = {
     uploadFile: async (req, res) => {
@@ -58,15 +61,23 @@ const fileController = {
             assignment.attachments.push(savedAttachment._id);
             await assignment.save();
 
-            return res.status(201).json({
+
+            const user = await User.findById(req.user.id);
+
+            if(user.assignments.includes(assignmentId)){
+                const attachmentIndex = user.attachments.findIndex(attachment => attachment.assignmentId.toString() === assignmentId);
+                user.attachments[attachmentIndex].attachmentId = savedAttachment._id;
+            }else{
+                user.assignments.push(assignmentId);
+                user.attachments.push({assignmentId: assignmentId, attachmentId: savedAttachment._id});
+            }
+
+            await user.save();
+
+            return res.status(200).json({
                 message: 'File uploaded successfully',
-                attachment: {
-                    id: savedAttachment._id,
-                    filename: savedAttachment.filename,
-                    size: savedAttachment.size,
-                    mimetype: savedAttachment.mimetype,
-                    uploadedBy: savedAttachment.uploadedBy,
-                    createdAt: savedAttachment.createdAt
+                data:{
+                    user: user,
                 }
             });
 
@@ -211,6 +222,124 @@ const fileController = {
             if (!res.headersSent) {
                 res.status(500).json({ message: 'Error deleting file' });
             }
+        }
+    },
+    getTextFromFiles: async (req, res) => {
+        try {
+            const { fileId } = req.params;
+            
+            if (!fileId || !mongoose.Types.ObjectId.isValid(fileId)) {
+                return res.status(400).json({ message: 'Invalid file ID' });
+            }
+    
+            const attachment = await Attachment.findOne({ _id: new mongoose.Types.ObjectId(fileId) });
+            if (!attachment) {
+                return res.status(404).json({ message: 'Attachment not found' });
+            }
+    
+            if (attachment.mimetype !== 'application/pdf') {
+                return res.status(400).json({ message: 'Only PDF files are supported' });
+            }
+    
+            const db = mongoose.connection.db;
+            const bucket = new mongoose.mongo.GridFSBucket(db, {
+                bucketName: 'uploads'
+            });
+    
+            // Get PDF buffer
+            const pdfBuffer = await new Promise((resolve, reject) => {
+                const chunks = [];
+                const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(attachment.path));
+                
+                downloadStream.on('data', (chunk) => chunks.push(chunk));
+                downloadStream.on('error', reject);
+                downloadStream.on('end', () => resolve(Buffer.concat(chunks)));
+            });
+    
+            const data = await pdfParse(pdfBuffer);
+            const text = data.text;
+
+            if (text.trim().length > 0) {
+                return res.json({
+                    success: true,
+                    method: 'pdfParse',
+                    text: text.trim()
+                });
+            }
+        } catch (error) {
+            console.error('Error in getTextFromFiles:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Error processing file'
+            });
+        }
+    },
+    saveAIReview: async (req, res) => {
+        try {
+            console.log(req.body);
+            const { attachmentId, review } = req.body;
+            console.log(attachmentId, review);
+            if (!attachmentId || !mongoose.Types.ObjectId.isValid(attachmentId)) {
+                return res.status(400).json({ message: 'Invalid file ID' });
+            }
+
+            const savedReview = new reviewModel({
+                evalScore: review.evalScore,
+                criteriaScore: review.criteriaScore,
+                suggestions: review.suggestions,
+                sections: review.sections,
+                areasOfImprovement: review.areasOfImprovement,
+                attachmentId: attachmentId
+            });
+
+            await savedReview.save();
+
+    
+            const attachment = await Attachment.findOne({ _id: new mongoose.Types.ObjectId(attachmentId) });
+            if (!attachment) {
+                return res.status(404).json({ message: 'Attachment not found' });
+            }
+    
+            attachment.aiReview = savedReview._id;
+            await attachment.save();
+    
+            return res.json({ message: 'Review saved successfully' });
+        } catch (error) {
+            console.error('Error in saveAiReview:', error);
+            return res.status(500).json({ message: 'Error saving review' });
+        }
+    },
+    getAIReview: async (req, res) => {
+        try {
+            const { fileId } = req.params;
+            if (!fileId || !mongoose.Types.ObjectId.isValid(fileId)) {
+                return res.status(400).json({ message: 'Invalid file ID' });
+            }
+    
+            const attachment = await Attachment.findOne({ _id: new mongoose.Types.ObjectId(fileId) });
+            if (!attachment) {
+                return res.status(404).json({ message: 'Attachment not found' });
+            }
+    
+            if (!attachment.aiReview) {
+                return res.status(404).json({ message: 'Review not found' });
+            }
+    
+            const review = await reviewModel.findOne({ _id: attachment.aiReview });
+            if (!review) {
+                return res.status(404).json({ message: 'Review not found' });
+            }
+    
+            return res.json({
+                evalScore: review.evalScore,
+                criteriaScore: review.criteriaScore,
+                suggestions: review.suggestions,
+                sections: review.sections,
+                areasOfImprovement: review.areasOfImprovement
+            });
+        } catch (error) {
+            console.error('Error in getAiReview:', error);
+            return res.status(500).json({ message: 'Error getting review' });
         }
     }
 };

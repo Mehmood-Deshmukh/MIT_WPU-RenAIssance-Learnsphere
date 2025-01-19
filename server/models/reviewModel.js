@@ -12,22 +12,22 @@ const reviewSchema = new Schema({
         required: true, // Ensures `criteriaScore` is mandatory
     },
     suggestions: {
-        type : Map,
-        of : Number,
-        required : false
-    },
-    suggestions: {
-            type : [String],
-            default : []
+        type : [String,],
+        required : true
     },
     sections: {
-        type: [String],
+        type: [String,],
         required: true,
     },
-    submissionID: {
+    areasOfImprovement : {
+        type : [String,],
+        required : true
+    },
+    attachmentId: {
         type: Schema.Types.ObjectId,
         // ref : Submission // Need Submission Model
+        required: true
     }
 });
 
-module.exports = mongoose.model("AIReview", reviewSchema);
+module.exports = mongoose.model("Review", reviewSchema);

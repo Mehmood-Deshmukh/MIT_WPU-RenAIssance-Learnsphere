@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const reviewModel = require('./reviewModel');
 
 const attachmentSchema = new Schema({
     filename: {
@@ -18,6 +19,7 @@ const attachmentSchema = new Schema({
         type: Number,
         required: true
     },
+    
     uploadedBy: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -27,6 +29,10 @@ const attachmentSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Assignment',
         required: true
+    },
+    aiReview:{
+        type: Schema.Types.ObjectId,
+        ref: reviewModel,
     },
     createdAt: {
         type: Date,
