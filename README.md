@@ -1,8 +1,8 @@
 # Overview
-Welcome to the repository. This project was built during 48-hour hackathon organized by MIT-WPU. This project is essentially a assignment submission portal for students and teachers. The project tries to enhance the prouductivity of teachers and students by using AI to :
-1. Grade the assignments
+Welcome to the LearnSpheres Repository!. This project was built during 48-hour hackathon organized by CSI MIT-WPU In collaboration with WorqHat. This project aims to streamline the process of submission and evaluation of assignments. The project tries to enhance the prouductivity of teachers and students by using AI to :
+1. Grade the assignments based on the professor's marking scheme
 2. Provide the areas of improvement / feedback
-3. Provides the score based on the metriecs provided by the teacher
+3. Provide the score based on the metriecs provided by the teacher
 4. Suggest resources to improve the areas of improvement
 
 ## Tech Stack
@@ -15,10 +15,10 @@ Welcome to the repository. This project was built during 48-hour hackathon organ
     - **Admin:** The admin can approve teachers sign up requests and teachers need to make a request to make a course.
     - **Teacher:** The teacher can create a course and students will put an enrollment request to join the course. The teacher can approve or reject the request.
     - **Student:** The student can enroll in the course and submit the assignments.
-2. **Assignment Submission:** The student can submit the assignment and the **WorqHat's LLM** will grade the assignment and provide the feedback: 
-    - **score**: The score of the assignment based on the metrics provided by the teacher.
-    - **feedback**: The feedback of the assignment including areas of improvement.
-    - **roadmap**: The roadmap to improve the areas of improvement.
+2. **Assignment Submission:** The student can submit the assignment and the **WorqHat's LLM** will provide a comprehensive evaluation of the assignment: 
+    - **Score**: The score of the assignment based on the metrics provided by the teacher.
+    - **Feedback**: The feedback of the assignment including problematic areas in the assignment.
+    - **Roadmap**: A roadmap is generated to guide the students towards improvement.
 
 ## How to run the project
 
