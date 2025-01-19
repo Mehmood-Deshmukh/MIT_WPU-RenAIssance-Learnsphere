@@ -50,7 +50,7 @@ const App = () => {
 
         {/* admin routes */}
         <Route path="/admin/login" element={!isAuthenticated ? <AdminLogin /> : (state?.user?.role == "student" ? <Navigate to="/studentDashboard" /> : <Navigate to="/teacher-dashboard" />)} />
-        <Route path="/admin/home" element={isAuthenticated && state?.user?.role == 'admin' ? <AdminHome /> : <Navigate to="/login" />} />
+        <Route path="/admin/home" element={isAuthenticated ? <AdminHome /> : <Navigate to="/login" />} />
         <Route path="/courses/:id" element={isAuthenticated ? <CoursePage /> : <Navigate to="/login" />} />
       </Routes>
     </>

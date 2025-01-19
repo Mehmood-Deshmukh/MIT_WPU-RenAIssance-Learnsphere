@@ -11,61 +11,6 @@ import { Button } from 'primereact/button';
 import { useState, useEffect } from 'react';
 import { DataView } from 'primereact/dataview';
 
-const courseTemplate = (course) => {
-  return (
-    <div className="col-12 md:col-6 lg:col-4 p-2">
-      <Card className="h-full">
-        <div className="flex flex-column h-full">
-          <div className="flex justify-content-between align-items-center">
-            <h3 className="text-xl font-bold m-0">{course.name}</h3>
-            {/* <Tag
-              severity={getStatusSeverity(course.status)}
-              value={course.status?.toUpperCase()}
-            /> */}
-          </div>
-          <div className="my-3">
-            <p className="m-0">
-              <strong>Course Title: {course.title}</strong>
-            </p>
-            <p className="m-0">
-              <strong>
-                Description: {course.description.substring(0, 20)}....
-              </strong>
-            </p>
-            <p className="m-0">
-              <strong>No of Students: {course.students.length}</strong>
-            </p>
-            <p className="m-0">
-              <strong>
-                Course Status :{" "}
-                {course.isApproved ? (
-                  <span className="text-green-700">Ongoing</span>
-                ) : (
-                  <span className="text-orange-500">Pending Approval</span>
-                )}
-              </strong>
-            </p>
-          </div>
-
-          <div className="mt-auto pt-3">
-            {course.isApproved ? (
-              <Button
-                label="View Details"
-                className="p-button-outlined w-full"
-                onClick={() => navigate(`/teacherdashboard/${course._id}`)}
-              />
-            ) : (
-              <div className="text-orange-500 border-2 p-2 text-center font-semibold rounded-md border-orange-500">
-                Waiting for Approval
-              </div>
-            )}
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
-};
-
 const EmptyState = ({ icon, title, message, action }) => (
   <div className="flex flex-column align-items-center justify-content-center py-8 px-4">
     <i className={`${icon} text-blue-300 mb-4`} style={{ fontSize: '3rem' }}></i>
@@ -89,6 +34,103 @@ const StudentDashboard = () => {
   const {state, dispatch} = useAuthContext();
   const user = state.user;
   const [allCourses, setAllCourses] = useState([]);
+  const courseTemplate = (course) => {
+    return (
+      <div className="col-12 md:col-6 lg:col-4 p-2">
+        <Card className="h-full">
+          <div className="flex flex-column h-full">
+            <div className="flex justify-content-between align-items-center">
+              <h3 className="text-xl font-bold m-0">{course.name}</h3>
+              {/* <Tag
+                severity={getStatusSeverity(course.status)}
+                value={course.status?.toUpperCase()}
+              /> */}
+            </div>
+            <div className="my-3">
+              <p className="m-0">
+                <strong>Course Title: {course.title}</strong>
+              </p>
+              <p className="m-0">
+                <strong>
+                  Description: {course.description.substring(0, 20)}....
+                </strong>
+              </p>
+              <p className="m-0">
+                <strong>No of Students: {course.students.length}</strong>
+              </p>
+              <p className="m-0">
+                <strong>
+                  Course Status :{" "}
+                  {course.isApproved ? (
+                    <span className="text-green-700">Ongoing</span>
+                  ) : (
+                    <span className="text-orange-500">Pending Approval</span>
+                  )}
+                </strong>
+              </p>
+            </div>
+  
+            <div className="mt-auto pt-3">
+              {course.isApproved ? (
+                <Button
+                  label="View Details"
+                  className="p-button-outlined w-full"
+                  onClick={() => navigate(`/courses/${course._id}`)}
+                />
+              ) : (
+                <div className="text-orange-500 border-2 p-2 text-center font-semibold rounded-md border-orange-500">
+                  Waiting for Approval
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
+  const assignmentTemplate = (assignment) => {
+    return (
+      <div className="col-12 md:col-6 lg:col-4 p-2">
+        <Card className="h-full">
+          <div className="flex flex-column h-full">
+            <div className="flex justify-content-between align-items-center">
+              <h3 className="text-xl font-bold m-0">{assignment.title}</h3>
+            </div>
+            
+            <div className="my-3">
+              <p className="m-0">
+                <strong>Course: {assignment.course}</strong>
+              </p>
+              <p className="m-0">
+                <strong>
+                  Description: {assignment.description?.substring(0, 20)}....
+                </strong>
+              </p>
+              <p className="m-0">
+                <strong>Due Date: {new Date(assignment.deadline).toLocaleDateString()}</strong>
+              </p>
+              <p className="m-0">
+                <strong>
+                  Status:{" "}
+                  <span className="text-orange-500">Pending</span>
+                </strong>
+              </p>
+            </div>
+  
+            <div className="mt-auto pt-3">
+              <Button
+                label="View Assignment"
+                className="p-button-outlined w-full"
+                onClick={() => navigate(`/studentAssignment/${assignment._id}`)}
+               />
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
 
   const fetchAllCourses = async () => {
     try {
@@ -100,7 +142,6 @@ const StudentDashboard = () => {
         }
       });
       const data = await response.json();
-      console.log(data.data);
       setAllCourses(data.data);
     } catch (error) {
       console.error('Error fetching all courses:', error);
@@ -120,6 +161,7 @@ const StudentDashboard = () => {
         }
       });
       const data = await response.json();
+      console.log(data);
       setEnrolledCourses(data.data);
     } catch (error) {
       console.error('Error fetching enrolled courses:', error);
@@ -137,6 +179,7 @@ const StudentDashboard = () => {
         }
       });
       const data = await response.json();
+      console.log("pending assignments", data.data);
       setUpcomingAssignments(data.data);
     } catch (error) {
       console.error('Error fetching pending assignments:', error);
@@ -209,25 +252,22 @@ const StudentDashboard = () => {
           </div>
         </Card>
       </div>
-      <div className="flex gap-4">
         {/* Pending Assignments */}
         <Panel header="Pending Assignments" className="shadow-md border-round-xl flex-1">
-          {upcomingAssignments?.length ? (
-            upcomingAssignments.map((assignment) => (
-              <Card key={assignment.id} className="flex flex-column gap-2 p-3 mb-3">
-                <h3>{assignment.title}</h3>
-                <p>{assignment.course}</p>
-                <Tag value={`Due: ${new Date(assignment.dueDate).toLocaleDateString()}`} severity="warning" />
-              </Card>
-            ))
-          ) : (
-            <EmptyState
-              icon="pi pi-check-circle"
-              title="All Caught Up!"
-              message="You have no pending assignments."
-            />
-          )}
-        </Panel>
+      {upcomingAssignments?.length ? (
+        <DataView 
+          value={upcomingAssignments} 
+          itemTemplate={assignmentTemplate} 
+          layout="grid" 
+        />
+      ) : (
+        <EmptyState
+          icon="pi pi-check-circle"
+          title="All Caught Up!"
+          message="You have no pending assignments."
+        />
+      )}
+    </Panel>
 
         {/* Course Progress */}
         <Panel header="Course Progress" className="shadow-md border-round-xl flex-1">
@@ -241,7 +281,7 @@ const StudentDashboard = () => {
             />
           )}
         </Panel>
-      </div>
+
       <Panel header="All Courses" className="shadow-md border-round-xl flex-1 mt-5">
           {allCourses.length ? (
             <DataView value={allCourses} itemTemplate={courseTemplate} layout="grid" />
