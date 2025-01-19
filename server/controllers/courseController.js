@@ -20,6 +20,23 @@ const isCourseApproved = async (req, res, next) => {
     }
 }
 
+const getCourse = async (req, res, next) => {
+    try {
+        const { courseId } = req.params;
+        const course = await Course.findById(courseId);
+        if (!course) {
+            throw new Error("Course not found");
+        }
+
+        res.status(201).json({
+            message: "Success!",
+            data: course,
+        })
+    } catch(e) {
+        res.status(500).json({ message: e.message });
+    }
+}
+
 const createCourse = async (req, res) => {
     try{
         const { title, description, createdBy, instructors} = req.body;
@@ -120,6 +137,7 @@ const getAllCourses = async (req, res) => {
 
 // rememeber to check is isApproved field of course is true or not
 module.exports = {
+    getCourse,
     isCourseApproved,
     createCourse,
     getCoursesByInstructor,
