@@ -1,5 +1,5 @@
 //Open this file only if you dont get offended by bad code
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -10,8 +10,13 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import ViewEnrollmentRequest from "../components/ViewEnrollmentRequest";
+import useAuthContext from "../hooks/useAuthContext";
+import { useNavigate, useParams } from "react-router";
+import axios from "axios";
 
 const TeacherDashboardCourse = () => {
+  const { state } = useAuthContext();
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [viewEnrollmentForm, setviewEnrollmentForm] = useState(false);
   const [newAssignment, setNewAssignment] = useState({
@@ -19,8 +24,36 @@ const TeacherDashboardCourse = () => {
     description: "",
     deadline: null,
   });
-  const toast = React.useRef(null);
+  const [allStudents, setAllStudents] = useState([]);
+  const { courseid } = useParams();
+  const [course, setCourse] = useState({});
 
+  useEffect(() => {
+    getCoursefromId(courseid);
+  }, []);
+
+  // useEffect(() => {
+  //   const fetchStudents = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         `http://localhost:3000/api/course/getAllStudentsForCourse/${courseid}`,
+  //         {
+  //           withCredentials: true,
+  //           headers: { Authorization: `Bearer ${state.token}` },
+  //         }
+  //       );
+  //       console.log(response.data);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   };
+  //   fetchStudents();
+  // });
+
+  const toast = React.useRef(null);
+  if (!state || !state.user || state.user.role !== "teacher") {
+    return navigate("/login");
+  }
   // Dummy data
   const courseTitle = "Introduction to React";
   const enrolledStudents = [
@@ -34,18 +67,60 @@ const TeacherDashboardCourse = () => {
     { id: 3, title: "Hooks in Depth", status: "Active", submissions: 1 },
   ];
 
-  const handleCreateAssignment = () => {
-    // Here you would typically send the new assignment data to your backend
-    // /api/assignments/create-assignment
-    console.log("New Assignment:", newAssignment);
-    toast.current.show({
-      severity: "success",
-      summary: "Success",
-      detail: "Assignment Created",
-      life: 3000,
-    });
+  const handleCreateAssignment = async () => {
+    const data = `Title: ${newAssignment.title},\n ${newAssignment.description}`;
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/get-rubrick",
+        {
+          prompt: data,
+        },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${state.token}` },
+        }
+      );
+      console.log(response);
+      const newAssignment = await createAssignmentfromRubrik(
+        response.data.data
+      );
+      console.log(newAssignment);
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
     setShowModal(false);
     setNewAssignment({ title: "", description: "", deadline: null });
+  };
+
+  const getCoursefromId = async (courseid) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/course/get-course/${courseid}`
+      );
+      console.log(response);
+      setCourse(response.data.data);
+      console.log("Course", response.data.data);
+    } catch (err) {
+      throw new Error(err);
+    }
+  };
+
+  const createAssignmentfromRubrik = async (rubrick) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/assignment/create-assignment",
+        { rubrick, course, deadline: newAssignment.deadline },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${state.token}` },
+        }
+      );
+      console.log(response);
+      return response.data;
+    } catch (err) {
+      throw new Error(err);
+    }
   };
 
   const footer = (
