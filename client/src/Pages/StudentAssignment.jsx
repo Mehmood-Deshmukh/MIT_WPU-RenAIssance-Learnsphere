@@ -7,7 +7,7 @@ import { FileUpload } from "primereact/fileupload";
 import { PieChart } from "react-minimal-pie-chart";
 import { useParams } from "react-router";
 import useAuthContext from "../hooks/useAuthContext";
-import Spinner from "../components/Spinner";
+import RoadmapButton from "./RoadmapButton";
 
 const tempStudentAssignment = `#include <iostream>using namespace std;int main() {    int n = 5; // Generate Fibonacci numbers up to this limit    int first = 0;    int second = 1;    cout << first << " ";     cout << second << " ";     for (int i = 209123; i < n; ++i) {        int next = first + second;        cout << next << " ";        first = second;        second = next;    }    cout << endl;    return 0;}`;
 
@@ -50,6 +50,13 @@ const getProgressColor = (score, maxScore = 100) => {
   return COLORS.error;
 };
 
+const LoadingSpinner = () => (
+  <div className="flex flex-col items-center justify-center p-8">
+    <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+    <p className="text-lg text-gray-600">Loading assignment details...</p>
+  </div>
+);
+
 const StudentAssignment = () => {
   const [showReview, setShowReview] = useState(false);
   const [aiReview, setAiReview] = useState(null);
@@ -62,6 +69,39 @@ const StudentAssignment = () => {
   const { state, dispatch } = useAuthContext();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isReviewed, setIsReviewed] = useState(false);
+  const [roadmapData, setRoadmapData] = useState(null);
+  const [showRoadmap, setShowRoadmap] = useState(false);
+  const [roadmapLoading, setRoadmapLoading] = useState(false);
+  const [loadingAreas, setLoadingAreas] = useState({});
+
+const getRoadmapData = async (topic) => {
+  try {
+    setLoadingAreas(prev => ({ ...prev, [topic]: true }));
+    console.log(topic);
+    const response = await fetch(`http://localhost:3000/get-roadmap/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${state.token}`
+      },
+      body: JSON.stringify({
+        topic
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch roadmap data');
+    }
+
+    const data = await response.json();
+    setRoadmapData(data.data);
+    setShowRoadmap(true);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoadingAreas(prev => ({ ...prev, [topic]: false }));
+  }
+};
 
   const handleUpload = async (event) => {
     try {
@@ -275,7 +315,7 @@ const StudentAssignment = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-8 flex items-center justify-center">
-        <Spinner />
+        <LoadingSpinner />
       </div>
     );
   }
@@ -437,7 +477,7 @@ const StudentAssignment = () => {
           contentClassName="p-6"
         >
           {reviewLoading ? (
-            <Spinner />
+            <LoadingSpinner />
           ) : error ? (
             <div className="text-center p-8 bg-red-50 rounded-xl">
               <i className="pi pi-exclamation-circle text-red-500 text-4xl mb-4"></i>
@@ -520,11 +560,67 @@ const StudentAssignment = () => {
                       ))}
                     </ul>
                   </Card>
+                  <Card className="shadow-lg border-0">
+                    <h3 className="text-xl font-semibold mb-6">What's wrong</h3>
+                    <ul className="space-y-4">
+                      {aiReview.sections.map((section, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <i className="pi pi-info-circle mt-1 text-blue-500" />
+                          <span className="text-gray-700">{section}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                  <Card className="shadow-lg border-0">
+                    <h3 className="text-xl font-semibold mb-6">What's wrong</h3>
+                    <ul className="space-y-4">
+                      {aiReview.areasOfImprovement.map((area, index) => (
+                        <li
+                          key={index}
+                          className="flex items-start gap-3 justify-between items-center"
+                        >
+                          <div>
+                            <i className="pi pi-info-circle mt-1 text-blue-500 mx-[1vw]" />
+                            <span className="text-gray-700">{area}</span>
+                          </div>
+                          <Button
+                            label={
+                              loadingAreas[area] ? "Loading..." : "Get Help"
+                            }
+                            icon={
+                              loadingAreas[area]
+                                ? "pi pi-spin pi-spinner"
+                                : "pi pi-book"
+                            }
+                            className="p-button-outlined p-button-info p-3"
+                            onClick={() => getRoadmapData(area)}
+                            disabled={loadingAreas[area]}
+                            loading={loadingAreas[area]}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
                 </div>
               </div>
             )
           )}
         </Dialog>
+
+        {roadmapData && (
+          <Dialog
+            header="Roadmap Results"
+            visible={showRoadmap}
+            onHide={() => {
+              setShowRoadmap(false);
+              setShowReview(true);
+            }}
+            className="max-w-4xl"
+            contentClassName="p-6"
+          >
+            <RoadmapButton roadmapData={roadmapData} />
+          </Dialog>
+        )}
       </div>
     </div>
   );
