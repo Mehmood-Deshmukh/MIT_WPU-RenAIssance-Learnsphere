@@ -6,13 +6,35 @@ import { DataTable } from "primereact/datatable";
 import useAuthContext from "../hooks/useAuthContext";
 import axios from "axios";
 
-const ViewEnrollmentRequest = ({ visible, onHide, data, courseId }) => {
+const ViewEnrollmentRequest = ({
+  visible,
+  onHide,
+  data,
+  teacherId,
+  courseId,
+}) => {
   const [requests, setRequests] = useState(data);
   const { state } = useAuthContext();
 
   useEffect(() => {
-    setRequests(data);
-  }, [data]);
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/course/enrollment-requests?instructorId=${teacherId}&courseId=${courseId}`,
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${state.token}` },
+          }
+        );
+        console.log("My data: " + response.data.data);
+        setRequests(response.data.data);
+        console.log("My requests: " + requests);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleApprove = async (requestId) => {
     console.log(requestId);
@@ -107,13 +129,13 @@ const ViewEnrollmentRequest = ({ visible, onHide, data, courseId }) => {
     {
       field: "requestedBy.Name",
       header: "Student Name",
-      body: (rowData) => rowData.requestedBy.Name,
+      body: (rowData) => rowData.requestedBy?.Name,
       sortable: true,
     },
     {
       field: "requestedBy.email",
       header: "Email",
-      body: (rowData) => rowData.requestedBy.email,
+      body: (rowData) => rowData.requestedBy?.email,
       sortable: true,
     },
     {
