@@ -85,6 +85,14 @@ const TeacherDashboardCourse = () => {
         response.data.data
       );
       console.log(newAssignment);
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Assignment created successfully",
+        life: 3000,
+      });
+
+      setShowModal(false);
       return response;
     } catch (err) {
       console.log(err);

@@ -41,6 +41,8 @@ const createAssignment = async (req, res) => {
     });
 
     const savedAssignment = await newAssignment.save();
+    currentCourse.assignments.push(savedAssignment._id);
+    await currentCourse.save();
     res.status(201).json({
       message: "Assignment created successfully",
       data: savedAssignment,
@@ -139,34 +141,38 @@ const deleteAssignment = async (req, res) => {
 
 const getAssignmentsByCourseID = async (req, res) => {
   try {
-    const assignments = await Assignment.find({ courseID: req.params.id });
-    if (!assignments) {
-      return res.status(404).json({ message: "Course Not Found!", data: null });
-    }
-
-    return res.status(200).json({ message: "Course Found", data: assignments });
-  } catch (e) {
-    return res
-      .status(500)
-      .json({ message: "Internal server error", data: null });
+    const courses = await courseModel.findById(req.params.id).populate("assignments");
+    res.status(200).json({
+      message: "Assignments fetched successfully",
+      data: courses.assignments,
+    });
   }
+  catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "Internal Server Error", data: null });
+  }
+
 };
 
 const getPendingAssignments = async (req, res) => {
   try {
-    const courses = await userModel.findById(req.user.id).populate("courses");
-    const user = await userModel.findById(req.user.id);
+    const user = await userModel.findById(req.user.id).populate("courses");
     let pendingAssignments = [];
+    const courses = user.courses;
     for (let i = 0; i < courses.length; i++) {
       const course = courses[i];
       const assignments = course.assignments;
       for (let j = 0; j < assignments.length; j++) {
         const assignment = assignments[j];
         if (!user.assignments.includes(assignment)) {
-          pendingAssignments.push(Assignment.findById(assignment));
+          console.log("assignment", assignment);
+          const currentAssignment = await Assignment.findById(assignment);
+          pendingAssignments.push(currentAssignment);
         }
       }
     }
+
+    console.log("pending assignments", pendingAssignments);
     res.status(200).json({
       message: "Pending Assignments fetched successfully",
       data: pendingAssignments,
