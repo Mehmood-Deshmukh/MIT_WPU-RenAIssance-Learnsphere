@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const Course = require("./courseModel");
+const User = require("./userModel");
 
 const requestSchema = new Schema({
     type: {
@@ -12,6 +14,16 @@ const requestSchema = new Schema({
         enum: ["PENDING", "APPROVED", "REJECTED"],
         default: "PENDING",
     },
+    requestedBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    requestedTo: {
+        type: String,
+        enum: ["admin", "teacher"],
+        default: "admin"
+    },
     feedback: {
         type: String,
         default: "",
@@ -23,11 +35,6 @@ const requestSchema = new Schema({
 });
 
 const courseCreationRequestSchema = new Schema({
-    requestedBy: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-    },
     course: {
         type: Schema.Types.ObjectId,
         ref: "Course",
@@ -44,11 +51,6 @@ const teacherSignupRequestSchema = new Schema({
 });
 
 const courseEnrollmentRequestSchema = new Schema({
-    requestedBy: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-    },
     course: {
         type: Schema.Types.ObjectId,
         ref: "Course",
@@ -84,5 +86,89 @@ Request.createCourseEnrollmentRequest = async function (requestedBy, course) {
         course,
     });
 };
+
+Request.approveRequest = async function (requestId, feedback) {
+    const request = await this.findById(requestId);
+    if (!request) {
+        throw new Error("Request Not Found");
+    }
+
+    if (request.status !== "PENDING") {
+        throw new Error("Request Already Processed");
+    }
+
+    request.status = "APPROVED";
+    request.feedback = feedback;
+    await request.save();
+
+    if (request.type === "COURSE_CREATION") {
+        const course = await Course.findById(request.course);
+        course.instructors.push(request.requestedBy);
+        await course.save();
+    }
+
+    if (request.type === "TEACHER_SIGNUP") {
+        const user = await User.findById(request.requestedBy);
+        if (!user) {
+            throw new Error("User Not Found");
+        }
+
+        user.isApproved = true;
+        await user.save();
+    }
+
+    return request;
+};
+
+Request.approveCourseEnrollment = async function (requestId, feedback) {
+    const request = await this.findById(requestId);
+    if (!request) {
+        throw new Error("Request Not Found");
+    }
+
+    if (request.status !== "PENDING") {
+        throw new Error("Request Already Processed");
+    }
+
+    request.status = "APPROVED";
+    request.feedback = feedback;
+    await request.save();
+
+    const course = await Course.findById(request.course);
+    course.students.push(request.requestedBy);
+    await course.save();
+
+    return request;
+};
+
+Request.rejectRequest = async function (requestId, feedback) {
+    const request = await this.findById(requestId);
+    if (!request) {
+        throw new Error("Request Not Found");
+    }
+
+    if (request.status !== "PENDING") {
+        throw new Error("Request Already Processed");
+    }
+
+    request.status = "REJECTED";
+    request.feedback = feedback;
+    await request.save();
+
+    return request;
+};
+
+Request.deleteRequest = async function (requestId) {
+    const request = await this.findById(requestId);
+    if (!request) {
+        throw new Error("Request Not Found");
+    }
+
+    await request.remove();
+};
+
+Request.getRequests = async function (requestedTo) {
+    return this.find({ requestedTo }).sort({ createdAt: -1 });
+}
 
 module.exports = Request;

@@ -24,13 +24,15 @@ router.get("/logout", (req, res) => {
   res.status(200).json({ message: "Logged Out" });
 });
 
-router.route("/authenticate-user").post(authenticateUser, async (req, res) => {
+router.route("/authenticate-user").post(async (req, res) => {
   try {
-    const foundUser = await userModel.findById(req.user?.id);
-    res.status(200).send({ message: "Authenticated", user: foundUser });
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWTSECRET);
+    const user = await userModel.findById(decoded.id);
+    res.status(200).json({ user });
   } catch (err) {
     console.log(err);
-    res.status(404).send({ message: "User not found" });
+    res.status(404).send({ message: err.message });
   }
 });
 

@@ -4,7 +4,8 @@ import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { PrimeReactProvider } from 'primereact/api';
+import { PrimeReactProvider } from "primereact/api";
+import AuthProvider from "./context/AuthContext.jsx";
 
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primeicons/primeicons.css";
@@ -14,12 +15,14 @@ import "primeflex/primeflex.css";
 import "react-toastify/dist/ReactToastify.css";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <PrimeReactProvider>
-      <BrowserRouter>
-        <App />
-        <ToastContainer />
-      </BrowserRouter>
-    </PrimeReactProvider>
-  </StrictMode>
+	<StrictMode>
+		<AuthProvider>
+			<PrimeReactProvider>
+				<BrowserRouter>
+					<App />
+					<ToastContainer />
+				</BrowserRouter>
+			</PrimeReactProvider>
+		</AuthProvider>
+	</StrictMode>
 );
