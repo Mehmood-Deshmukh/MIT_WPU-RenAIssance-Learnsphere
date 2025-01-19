@@ -36,7 +36,7 @@ const SignupForm = () => {
       sessionStorage.setItem("token", response.data.token);
       if (response.status === 200) {
         dispatch({ type: "LOGIN", payload: response.data });
-        navigate("/");
+        navigate("/studentDashboard");
       }
     } catch (err) {
       console.log(err);

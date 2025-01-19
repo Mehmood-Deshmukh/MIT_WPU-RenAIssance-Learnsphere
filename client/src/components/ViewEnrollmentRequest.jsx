@@ -1,27 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { DataTable } from "primereact/datatable";
+import useAuthContext from "../hooks/useAuthContext";
+import axios from "axios";
 
-const ViewEnrollmentRequest = ({ visible, onHide, courseId }) => {
+const ViewEnrollmentRequest = ({ visible, onHide, courseId, teacherId }) => {
   // Sample data - in real app, this would come from props or AP
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      studentName: "John Doe",
-      email: "john.doe@example.com",
-      requestDate: "2025-01-15",
-      status: "pending",
-    },
-    {
-      id: 2,
-      studentName: "Jane Smith",
-      email: "jane.smith@example.com",
-      requestDate: "2025-01-16",
-      status: "pending",
-    },
-  ]);
+  //enrollment-requests/:instructorId
+  const [requests, setRequests] = useState([]);
+  const { state } = useAuthContext();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/course/enrollment-requests/${teacherId}`,
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${state.token}` },
+          }
+        );
+        console.log("My data: " + response.data.data);
+        setRequests([response.data.data]);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  });
 
   const handleApprove = (requestId) => {
     setRequests(
@@ -29,6 +36,7 @@ const ViewEnrollmentRequest = ({ visible, onHide, courseId }) => {
         request.id === requestId ? { ...request, status: "approved" } : request
       )
     );
+    console.log(requestId);
     // In real app: Make API call to update status
   };
 
@@ -43,7 +51,7 @@ const ViewEnrollmentRequest = ({ visible, onHide, courseId }) => {
 
   const statusBodyTemplate = (rowData) => {
     return (
-      <span className={`status-badge status-${rowData.status.toLowerCase()}`}>
+      <span className={`status-badge status-${rowData.status?.toLowerCase()}`}>
         {rowData.status}
       </span>
     );
@@ -83,12 +91,6 @@ const ViewEnrollmentRequest = ({ visible, onHide, courseId }) => {
     {
       field: "requestDate",
       header: "Request Date",
-      sortable: true,
-    },
-    {
-      field: "status",
-      header: "Status",
-      body: statusBodyTemplate,
       sortable: true,
     },
     {

@@ -23,7 +23,8 @@ const isCourseApproved = async (req, res, next) => {
 const getCourse = async (req, res, next) => {
   try {
     const { courseId } = req.params;
-    const course = await Course.findById(courseId);
+    const course = await Course.findById(courseId).populate("assignments");
+    console.log("course", course);
     if (!course) {
       throw new Error("Course not found");
     }
@@ -106,12 +107,15 @@ const enrollStudent = async (req, res) => {
 const getEnrollmentRequests = async (req, res) => {
   try {
     const { instructorId } = req.params;
-    const requests = await Request.find({
-      type: "COURSE_ENROLLMENT",
-      instructors: { $in: instructorId },
-    }).sort({ createdAt: -1 });
-
-    res.json({ message: "success", data: requests });
+    try {
+      const requests = await Request.find({
+        type: "COURSE_ENROLLMENT",
+        instructors: { $in: instructorId },
+      }).sort({ createdAt: -1 });
+      res.json({ message: "success", data: requests });
+    } catch (e) {
+      res.json({ message: "success", data: [] });
+    }
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
@@ -166,8 +170,8 @@ const getAllCourses = async (req, res) => {
 
 const getAllUserCourses = async (req, res) => {
   try {
-    const courseIds = await userModel.findById(req.user.id).populate("courses");
-    const courses = await Course.find({ _id: { $in: courseIds } });
+    const user = await userModel.findById(req.user.id).populate("courses");
+    const courses = user.courses;
 
     res.json({ message: "success", data: courses });
   } catch (e) {

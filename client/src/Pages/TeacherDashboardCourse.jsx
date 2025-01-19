@@ -1,5 +1,5 @@
 //Open this file only if you dont get offended by bad code
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -8,7 +8,7 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
-import { Toast } from "primereact/toast";
+
 import ViewEnrollmentRequest from "../components/ViewEnrollmentRequest";
 import useAuthContext from "../hooks/useAuthContext";
 import { useNavigate, useParams } from "react-router";
@@ -24,48 +24,34 @@ const TeacherDashboardCourse = () => {
     description: "",
     deadline: null,
   });
-  const [allStudents, setAllStudents] = useState([]);
-  const { courseid } = useParams();
-  const [course, setCourse] = useState({});
-
   useEffect(() => {
     getCoursefromId(courseid);
   }, []);
 
-  // useEffect(() => {
-  //   const fetchStudents = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `http://localhost:3000/api/course/getAllStudentsForCourse/${courseid}`,
-  //         {
-  //           withCredentials: true,
-  //           headers: { Authorization: `Bearer ${state.token}` },
-  //         }
-  //       );
-  //       console.log(response.data);
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   };
-  //   fetchStudents();
-  // });
+  const [allStudents, setAllStudents] = useState([]);
+  const { courseid } = useParams();
+  const [course, setCourse] = useState({});
 
-  const toast = React.useRef(null);
   if (!state || !state.user || state.user.role !== "teacher") {
     return navigate("/login");
   }
+
   // Dummy data
-  const courseTitle = "Introduction to React";
-  const enrolledStudents = [
-    { id: 1, name: "John Doe" },
-    { id: 2, name: "Jane Smith" },
-    { id: 3, name: "Bob Johnson" },
-  ];
-  const assignments = [
-    { id: 1, title: "React Basics", status: "Active", submissions: 2 },
-    { id: 2, title: "State Management", status: "Past", submissions: 3 },
-    { id: 3, title: "Hooks in Depth", status: "Active", submissions: 1 },
-  ];
+
+  const fetchStudents = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/course/getAllStudentsForCourse/${courseid}`,
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${state.token}` },
+        }
+      );
+      setAllStudents(response.data.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleCreateAssignment = async () => {
     const data = `Title: ${newAssignment.title},\n ${newAssignment.description}`;
@@ -85,6 +71,14 @@ const TeacherDashboardCourse = () => {
         response.data.data
       );
       console.log(newAssignment);
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Assignment created successfully",
+        life: 3000,
+      });
+
+      setShowModal(false);
       return response;
     } catch (err) {
       console.log(err);
@@ -123,6 +117,18 @@ const TeacherDashboardCourse = () => {
     }
   };
 
+  //dummy data
+  const enrolledStudents = [
+    { id: 1, name: "John Doe" },
+    { id: 2, name: "Jane Smith" },
+    { id: 3, name: "Bob Johnson" },
+  ];
+  const assignments = [
+    { id: 1, title: "React Basics", status: "Active", submissions: 2 },
+    { id: 2, title: "State Management", status: "Past", submissions: 3 },
+    { id: 3, title: "Hooks in Depth", status: "Active", submissions: 1 },
+  ];
+
   const footer = (
     <div>
       <Button
@@ -143,28 +149,27 @@ const TeacherDashboardCourse = () => {
 
   return (
     <div className="p-4 md:w-[80%] w-[95%] m-auto">
-      <Toast ref={toast} />
       <Card className="mb-5">
         <div className="w-full flex md:flex-row justify-between flex-col">
           <div>
-            <h1 className="text-5xl mb-4">Course - {courseTitle}</h1>
-            <h2 className="text-2xl mb-4">Welcome Back Abhijit</h2>
-            <Button
-              label="Create New Assignment"
-              icon="pi pi-plus"
-              severity="success"
-              className="p-2"
-              onClick={() => setShowModal(true)}
-            />
-          </div>
-          <div className="md:flex flex-col justify-between items-end hidden ">
-            <Button
-              label="View Enrollment Requests"
-              icon="pi pi-eye"
-              className="p-2 block m-3"
-              severity="info"
-              onClick={() => setviewEnrollmentForm(true)}
-            />
+            <h1 className="text-5xl mb-4">Course - {course.title}</h1>
+            <h2 className="text-2xl mb-4">Welcome Back {state.user.Name}</h2>
+            <div>
+              <Button
+                label="Create New Assignment"
+                icon="pi pi-plus"
+                severity="success"
+                className="p-2 my-2 mx-3 ml-0"
+                onClick={() => setShowModal(true)}
+              />
+              <Button
+                label="View Enrollment Requests"
+                icon="pi pi-eye"
+                className="p-2 mx-3 my-2 ml-0"
+                severity="info"
+                onClick={() => setviewEnrollmentForm(true)}
+              />
+            </div>
           </div>
         </div>
       </Card>
@@ -276,6 +281,7 @@ const TeacherDashboardCourse = () => {
         <ViewEnrollmentRequest
           visible={viewEnrollmentForm}
           onHide={() => setviewEnrollmentForm(false)}
+          teacherId={state.user._id}
         />
       </div>
     </div>
