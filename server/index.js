@@ -86,7 +86,7 @@ You are an expert evaluator responsible for scoring assignments based on a provi
 
 ### Instructions:
 1. **Understand the Rubric**: Use the criteria in the "emphasisPoints" field of the rubric and the strictness level to evaluate the assignment. The evaluation must align with the total points specified in "markingScheme."
-2. **Assign Scores**: Divide the total score across the criteria in the rubric and calculate the "criteriaScore" field based on the rubric and strictness.
+2. **Assign Scores**: Divide the total score across the criteria in the rubric and calculate the "criteriaScore" field based on the rubric and strictness make sure that the individual acores add up to the final evaluation score.
 3. **Provide Suggestions**: Include specific, actionable feedback for each criterion. Address weak areas and recommend improvements.
 4. **Highlight Problematic Sections**: Identify and extract exact snippets from the assignment that:
    - Are irrelevant or weakly related to the assignment topic.
