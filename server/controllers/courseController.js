@@ -1,6 +1,8 @@
 const Course = require("../models/courseModel");
 const Request = require("../models/requestSchema");
 const userModel = require("../models/userModel");
+const { ObjectId } = require("mongoose");
+const mongoose = require("mongoose");
 
 const isCourseApproved = async (req, res, next) => {
   try {
@@ -80,13 +82,13 @@ const getCoursesByInstructor = async (req, res) => {
 };
 
 const enrollStudent = async (req, res) => {
-    try{
-        const {studentId } = req.body;
-        const { courseId } = req.params;
-        const course = await Course.findById(courseId);
-        if (!course) {
-            throw new Error("Course not found");
-        }
+  try {
+    const { studentId } = req.body;
+    const { courseId } = req.params;
+    const course = await Course.findById(courseId);
+    if (!course) {
+      throw new Error("Course not found");
+    }
 
     const request = await Request.createCourseEnrollmentRequest(
       studentId,
@@ -106,12 +108,24 @@ const enrollStudent = async (req, res) => {
 
 const getEnrollmentRequests = async (req, res) => {
   try {
-    const { instructorId } = req.params;
+    const { instructorId, courseId } = req.query;
+    const myObjID = new mongoose.Types.ObjectId(courseId);
+    console.log(instructorId, courseId);
     try {
-      const requests = await Request.find({
+      const currCourse = await Course.findOne({ _id: courseId });
+      if (!currCourse.instructors.includes(instructorId)) {
+        return res
+          .status(403)
+          .json({ message: "You are not authorized to view this course" });
+      }
+      let requests = await Request.find({
         type: "COURSE_ENROLLMENT",
-        instructors: { $in: instructorId },
-      }).sort({ createdAt: -1 });
+      })
+        .populate("requestedBy")
+        .sort({ createdAt: -1 });
+      requests = requests.filter((request) => {
+        return request.course.toString() == courseId;
+      });
       res.json({ message: "success", data: requests });
     } catch (e) {
       res.json({ message: "success", data: [] });

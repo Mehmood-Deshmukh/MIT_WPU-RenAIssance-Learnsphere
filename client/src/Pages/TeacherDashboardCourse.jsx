@@ -19,24 +19,45 @@ const TeacherDashboardCourse = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [viewEnrollmentForm, setviewEnrollmentForm] = useState(false);
+  const { courseid } = useParams();
+  const [requests, setRequests] = useState([]);
   const [newAssignment, setNewAssignment] = useState({
     title: "",
     description: "",
     deadline: null,
   });
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/course/enrollment-requests?instructorId=${state.user._id}&courseId=${courseid}`,
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${state.token}` },
+          }
+        );
+        const data = await response.json();
+        console.log(data);
+
+        setRequests([...data.data]);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
     getCoursefromId(courseid);
+    fetchStudents();
   }, []);
 
   const [allStudents, setAllStudents] = useState([]);
-  const { courseid } = useParams();
   const [course, setCourse] = useState({});
 
   if (!state || !state.user || state.user.role !== "teacher") {
     return navigate("/login");
   }
-
-  // Dummy data
 
   const fetchStudents = async () => {
     try {
@@ -71,13 +92,6 @@ const TeacherDashboardCourse = () => {
         response.data.data
       );
       console.log(newAssignment);
-      toast.current.show({
-        severity: "success",
-        summary: "Success",
-        detail: "Assignment created successfully",
-        life: 3000,
-      });
-
       setShowModal(false);
       return response;
     } catch (err) {
@@ -118,11 +132,7 @@ const TeacherDashboardCourse = () => {
   };
 
   //dummy data
-  const enrolledStudents = [
-    { id: 1, name: "John Doe" },
-    { id: 2, name: "Jane Smith" },
-    { id: 3, name: "Bob Johnson" },
-  ];
+
   const assignments = [
     { id: 1, title: "React Basics", status: "Active", submissions: 2 },
     { id: 2, title: "State Management", status: "Past", submissions: 3 },
@@ -175,19 +185,18 @@ const TeacherDashboardCourse = () => {
       </Card>
       <Card title="Enrolled Students" className="mb-5">
         <DataTable
-          value={enrolledStudents}
+          value={allStudents}
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10, 25, 50]}
           tableStyle={{ minWidth: "50rem" }}
         >
-          <Column field="id" header="MIS" style={{ width: "25%" }}></Column>
-          <Column field="name" header="Name" style={{ width: "25%" }}></Column>
           <Column
-            field="company"
-            header="Company"
+            field="rollNumber"
+            header="MIS"
             style={{ width: "25%" }}
           ></Column>
+          <Column field="Name" header="Name" style={{ width: "25%" }}></Column>
           <Column
             field="representative.name"
             header="Representative"
@@ -281,7 +290,8 @@ const TeacherDashboardCourse = () => {
         <ViewEnrollmentRequest
           visible={viewEnrollmentForm}
           onHide={() => setviewEnrollmentForm(false)}
-          teacherId={state.user._id}
+          data={requests}
+          courseId={courseid}
         />
       </div>
     </div>

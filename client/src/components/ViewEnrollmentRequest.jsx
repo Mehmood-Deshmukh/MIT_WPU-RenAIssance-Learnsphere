@@ -6,70 +6,96 @@ import { DataTable } from "primereact/datatable";
 import useAuthContext from "../hooks/useAuthContext";
 import axios from "axios";
 
-const ViewEnrollmentRequest = ({ visible, onHide, courseId, teacherId }) => {
-  // Sample data - in real app, this would come from props or AP
-  //enrollment-requests/:instructorId
-  const [requests, setRequests] = useState([]);
+const ViewEnrollmentRequest = ({ visible, onHide, data, courseId }) => {
+  const [requests, setRequests] = useState(data);
   const { state } = useAuthContext();
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/api/course/enrollment-requests/${teacherId}`,
-          {
-            withCredentials: true,
-            headers: { Authorization: `Bearer ${state.token}` },
-          }
-        );
-        console.log("My data: " + response.data.data);
-        setRequests([response.data.data]);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchData();
-  });
 
-  const handleApprove = (requestId) => {
-    setRequests(
-      requests.map((request) =>
-        request.id === requestId ? { ...request, status: "approved" } : request
-      )
-    );
+  useEffect(() => {
+    setRequests(data);
+  }, [data]);
+
+  const handleApprove = async (requestId) => {
     console.log(requestId);
-    // In real app: Make API call to update status
+    try {
+      // Make API call here
+      const response = await axios.post(
+        `http://localhost:3000/api/teacher/approve-course-enrollment/${requestId}`,
+        {
+          requestId: requestId,
+          courseId: courseId,
+          feedback: "",
+        },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${state.token}` },
+        }
+      );
+      console.log(response.data);
+      setRequests(
+        requests.map((request) =>
+          request._id === requestId
+            ? { ...request, status: "APPROVED" }
+            : request
+        )
+      );
+    } catch (error) {
+      console.error("Error approving request:", error);
+    }
   };
 
-  const handleReject = (requestId) => {
-    setRequests(
-      requests.map((request) =>
-        request.id === requestId ? { ...request, status: "rejected" } : request
-      )
-    );
-    // In real app: Make API call to update status
+  const handleReject = async (requestId) => {
+    try {
+      // Make API call here
+      setRequests(
+        requests.map((request) =>
+          request._id === requestId
+            ? { ...request, status: "REJECTED" }
+            : request
+        )
+      );
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   const statusBodyTemplate = (rowData) => {
+    const statusClass =
+      {
+        PENDING: "bg-yellow-100 text-yellow-900",
+        APPROVED: "bg-green-100 text-green-900",
+        REJECTED: "bg-red-100 text-red-900",
+      }[rowData.status] || "bg-gray-100";
+
     return (
-      <span className={`status-badge status-${rowData.status?.toLowerCase()}`}>
+      <span className={`px-2 py-1 rounded-full text-sm ${statusClass}`}>
         {rowData.status}
       </span>
     );
   };
 
   const actionBodyTemplate = (rowData) => {
-    if (rowData.status === "pending") {
+    if (rowData.status === "PENDING") {
       return (
-        <div className="action-buttons">
+        <div className="flex gap-2">
           <Button
             icon="pi pi-check"
-            className="p-button-success p-button-sm mr-2"
-            onClick={() => handleApprove(rowData.id)}
+            className="p-button-success p-2"
+            onClick={() => handleApprove(rowData._id)}
+            tooltip="Approve"
           />
           <Button
             icon="pi pi-times"
-            className="p-button-danger p-button-sm"
-            onClick={() => handleReject(rowData.id)}
+            className="p-button-danger p-2"
+            onClick={() => handleReject(rowData._id)}
+            tooltip="Reject"
           />
         </div>
       );
@@ -79,18 +105,27 @@ const ViewEnrollmentRequest = ({ visible, onHide, courseId, teacherId }) => {
 
   const columns = [
     {
-      field: "studentName",
+      field: "requestedBy.Name",
       header: "Student Name",
+      body: (rowData) => rowData.requestedBy.Name,
       sortable: true,
     },
     {
-      field: "email",
+      field: "requestedBy.email",
       header: "Email",
+      body: (rowData) => rowData.requestedBy.email,
       sortable: true,
     },
     {
-      field: "requestDate",
+      field: "createdAt",
       header: "Request Date",
+      body: (rowData) => formatDate(rowData.createdAt),
+      sortable: true,
+    },
+    {
+      field: "status",
+      header: "Status",
+      body: statusBodyTemplate,
       sortable: true,
     },
     {

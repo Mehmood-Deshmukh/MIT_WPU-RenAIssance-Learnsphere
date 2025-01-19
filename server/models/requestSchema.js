@@ -127,7 +127,11 @@ Request.approveRequest = async function (requestId, feedback) {
   return request;
 };
 
-Request.approveCourseEnrollment = async function (requestId, feedback) {
+Request.approveCourseEnrollment = async function (
+  requestId,
+  courseId,
+  feedback
+) {
   const request = await this.findById(requestId);
   if (!request) {
     throw new Error("Request Not Found");
@@ -141,9 +145,15 @@ Request.approveCourseEnrollment = async function (requestId, feedback) {
   request.feedback = feedback;
   await request.save();
 
-  const course = await Course.findById(request.course);
+  console.log("requestedBy: ", request.course);
+
+  const course = await Course.findById(courseId);
   course.students.push(request.requestedBy);
   await course.save();
+
+  const student = await User.findById(request.requestedBy);
+  student.courses.push(course._id);
+  await student.save();
 
   return request;
 };

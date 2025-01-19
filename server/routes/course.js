@@ -31,11 +31,7 @@ router.post(
   isCourseApproved,
   enrollStudent
 );
-router.get(
-  "/enrollment-requests/:instructorId",
-  authenticateUser,
-  getEnrollmentRequests
-);
+router.get("/enrollment-requests", authenticateUser, getEnrollmentRequests);
 router.post(
   "/approve-enrollment-request/:courseId",
   authenticateUser,
