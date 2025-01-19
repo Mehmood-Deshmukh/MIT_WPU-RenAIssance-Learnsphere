@@ -10,5 +10,6 @@ router.post('/upload', upload.single("file"), authenticateUser, fileController.u
 router.get('/:fileId', authenticateUser,fileController.getFile);
 router.get('/assignment/:assignmentId', authenticateUser, fileController.getAssignmentFiles);
 router.delete('/:fileId', authenticateUser, fileController.deleteFile);
+router.get('/getText/:fileId', authenticateUser, fileController.getTextFromFiles);
 
 module.exports = router;

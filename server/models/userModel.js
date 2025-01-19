@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Attachment = require("./attachmentModel");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -36,6 +37,23 @@ const userSchema = new Schema({
 	assignments: {
 		type: [Schema.Types.ObjectId],
 		ref: "Assignment",
+	},
+	attachments: {
+		/* two fields assignmentId and attachmentID like a json object */
+		type: [
+			{
+				assignmentId: {
+					type: Schema.Types.ObjectId,
+					ref: "Assignment",
+					required: true,
+				},
+				attachmentId: {
+					type: Schema.Types.ObjectId,
+					ref: "Attachment",
+					required: true,
+				},
+			},
+		],
 	},
 
 	// following fields are only for teacher

@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router";
 import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Singup from "./Pages/Signup";
-
+import StudentAssignment from "./Pages/StudentAssignment";
 import useAuthContext from "./hooks/useAuthContext";
 
 const App = () => {

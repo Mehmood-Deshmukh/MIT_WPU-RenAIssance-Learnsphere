@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Assignment = require('../models/assignmentModel');
 const Attachment = require('../models/attachmentModel');
 const User = require('../models/userModel');
+const pdfParse = require('pdf-parse');
 
 const fileController = {
     uploadFile: async (req, res) => {
@@ -59,17 +60,23 @@ const fileController = {
             assignment.attachments.push(savedAttachment._id);
             await assignment.save();
 
+
             const user = await User.findById(req.user.id);
 
-            return res.status(201).json({
+            if(user.assignments.includes(assignmentId)){
+                const attachmentIndex = user.attachments.findIndex(attachment => attachment.assignmentId.toString() === assignmentId);
+                user.attachments[attachmentIndex].attachmentId = savedAttachment._id;
+            }else{
+                user.assignments.push(assignmentId);
+                user.attachments.push({assignmentId: assignmentId, attachmentId: savedAttachment._id});
+            }
+
+            await user.save();
+
+            return res.status(200).json({
                 message: 'File uploaded successfully',
-                attachment: {
-                    id: savedAttachment._id,
-                    filename: savedAttachment.filename,
-                    size: savedAttachment.size,
-                    mimetype: savedAttachment.mimetype,
-                    uploadedBy: savedAttachment.uploadedBy,
-                    createdAt: savedAttachment.createdAt
+                data:{
+                    user: user,
                 }
             });
 
@@ -217,7 +224,54 @@ const fileController = {
         }
     },
     getTextFromFiles: async (req, res) => {
-        /*  */
+        try {
+            const { fileId } = req.params;
+            
+            if (!fileId || !mongoose.Types.ObjectId.isValid(fileId)) {
+                return res.status(400).json({ message: 'Invalid file ID' });
+            }
+    
+            const attachment = await Attachment.findOne({ _id: new mongoose.Types.ObjectId(fileId) });
+            if (!attachment) {
+                return res.status(404).json({ message: 'Attachment not found' });
+            }
+    
+            if (attachment.mimetype !== 'application/pdf') {
+                return res.status(400).json({ message: 'Only PDF files are supported' });
+            }
+    
+            const db = mongoose.connection.db;
+            const bucket = new mongoose.mongo.GridFSBucket(db, {
+                bucketName: 'uploads'
+            });
+    
+            // Get PDF buffer
+            const pdfBuffer = await new Promise((resolve, reject) => {
+                const chunks = [];
+                const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(attachment.path));
+                
+                downloadStream.on('data', (chunk) => chunks.push(chunk));
+                downloadStream.on('error', reject);
+                downloadStream.on('end', () => resolve(Buffer.concat(chunks)));
+            });
+    
+            const data = await pdfParse(pdfBuffer);
+            const text = data.text;
+
+            if (text.trim().length > 0) {
+                return res.json({
+                    success: true,
+                    method: 'pdfParse',
+                    text: text.trim()
+                });
+            }
+        } catch (error) {
+            console.error('Error in getTextFromFiles:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Error processing file'
+            });
+        }
     }
 };
 

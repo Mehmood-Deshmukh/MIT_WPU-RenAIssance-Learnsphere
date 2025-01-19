@@ -24,11 +24,11 @@ const Dashboard = () => {
     { id: 3, title: 'Dataset Analysis', course: 'Machine Learning Basics', dueDate: '2025-01-28', status: 'pending' }
   ];
 
-  useEffect(() => {
+/*   useEffect(() => {
     const authUser = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        navigate("/auth/login");
+        navigate("/login");
       }
       try {
         const getToken = JSON.parse(localStorage.getItem("token"));
@@ -41,19 +41,19 @@ const Dashboard = () => {
         setLoading(false);
       } catch (err) {
         console.log(err);
-        navigate("/auth/login");
+        navigate("/login");
       }
     };
     authUser();
-  }, [navigate]);
+  }, [navigate]); */
 
-  if (loading) {
+/*   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i>
       </div>
     );
-  }
+  } */
 
   return (
     <div className="grid p-4">
