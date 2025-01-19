@@ -10,6 +10,7 @@ const {
     getEnrollmentRequests,
     approveEnrollmentRequest,
     getCourseAssignments,
+    getAllUserCourses,
     getAllCourses
 } = require("../controllers/courseController");
 
@@ -22,6 +23,7 @@ router.post("/enroll-student/:courseId",authenticateUser, isCourseApproved, enro
 router.get("/enrollment-requests/:instructorId", authenticateUser, getEnrollmentRequests);
 router.post("/approve-enrollment-request/:courseId", authenticateUser,  isCourseApproved, approveEnrollmentRequest);
 router.get("/assignments/:courseId", authenticateUser, isCourseApproved, getCourseAssignments);
+router.get("/getAllUserCourses", authenticateUser, getAllUserCourses);
 router.get("/getAllCourses", authenticateUser, getAllCourses);
 
 module.exports = router;

@@ -124,10 +124,20 @@ const getCourseAssignments = async (req, res) => {
     }
 }
 
-const getAllCourses = async (req, res) => {
+const getAllUserCourses = async (req, res) => {
     try{
         const courseIds = await userModel.findById(req.user.id).populate('courses');
         const courses = await Course.find({ _id: { $in: courseIds } });
+
+        res.json({ message: "success", data: courses });
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+}
+
+const getAllCourses = async (req, res) => {
+    try{
+        const courses = await Course.find({ isApproved: true });
 
         res.json({ message: "success", data: courses });
     } catch (e) {
@@ -145,5 +155,6 @@ module.exports = {
     getEnrollmentRequests,
     approveEnrollmentRequest,
     getCourseAssignments,
-    getAllCourses
+    getAllCourses,
+    getAllUserCourses
 }

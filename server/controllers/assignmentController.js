@@ -124,7 +124,7 @@ const getAssignmentsByCourseID = async (req, res) => {
 const getPendingAssignments = async (req, res) => {
     try {
         const courses = await userModel.findById(req.user.id).populate('courses');
-        const user = await userModel.findById(req.user);
+        const user = await userModel.findById(req.user.id);
         let pendingAssignments = [];
         for (let i = 0; i < courses.length; i++) {
             const course = courses[i];

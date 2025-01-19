@@ -12,7 +12,7 @@ router.get("/get-assignments-by-course-id/:id", authenticateUser, getAssignments
 router.post('/create-assignment', authenticateUser, verifyRole('teacher'), createAssignment);
 router.put('/update-assignment/:id', authenticateUser, verifyRole('teacher'), updateAssignment);
 router.delete('/delete-assignment/:id', authenticateUser, verifyRole('teacher'), deleteAssignment);
-router.get('/getPendingAssignments', authenticateUser, verifyRole('student'), getPendingAssignments);
+router.get('/getPendingAssignments', authenticateUser, getPendingAssignments);
 
 
 module.exports = router;
