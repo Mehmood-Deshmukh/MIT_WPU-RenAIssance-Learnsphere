@@ -51,24 +51,24 @@ const SidebarComponent = ({ userRole }) => {
                 template: itemTemplate,
                 label: 'Dashboard',
                 icon: 'pi pi-home',
-                command: (navigateDashboard) 
+                command: () => {navigateDashboard} 
             }
         ];
 
         const teacherItems = [
             ...commonItems,
-            {
-                template: itemTemplate,
-                label: 'Pending Assignments',
-                icon: 'pi pi-clock',
-                command: () => {/* handle navigation */}
-            },
-            {
-                template: itemTemplate,
-                label: 'Grade Management',
-                icon: 'pi pi-chart-bar',
-                command: () => {/* handle navigation */}
-            }
+            // {
+            //     template: itemTemplate,
+            //     label: 'Pending Assignments',
+            //     icon: 'pi pi-clock',
+            //     command: () => {/* handle navigation */}
+            // },
+            // {
+            //     template: itemTemplate,
+            //     label: 'Grade Management',
+            //     icon: 'pi pi-chart-bar',
+            //     command: () => {/* handle navigation */}
+            // }
         ];
 
         const studentItems = [
