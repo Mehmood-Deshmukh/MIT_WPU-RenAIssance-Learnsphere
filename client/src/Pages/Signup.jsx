@@ -1,6 +1,8 @@
 import SignupForm from "../components/SignupForm";
+import {useNavigate} from "react-router-dom";
 
 const Singup = () => {
+  const navigate = useNavigate();
   return (
     <>
       <div className="flex items-center justify-center h-screen w-full px-5 sm:px-0">
@@ -19,6 +21,12 @@ const Singup = () => {
               Sign Up
             </span>
             <SignupForm />
+            <p className="text-center mt-5">
+							Already have an account?{" "}
+							<span className="text-blue-400 cursor-pointer" onClick={() => navigate("/login")}>
+								Sign in
+							</span>
+						</p>
           </div>
         </div>
       </div>
