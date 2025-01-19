@@ -5,7 +5,7 @@ import Singup from "./Pages/Signup";
 import useAuthContext from "./hooks/useAuthContext";
 import StudentAssignment from "./Pages/StudentAssignment";
 import StudentDashboard from "./Pages/studentDashboard";
-
+import NotFound from "./Pages/NotFound";
 import TeacherDashboardCourse from "./Pages/TeacherDashboardCourse";
 import TeacherDashboardMain from "./Pages/TeacherDashboardMain";
 // import ViewEnrollmentRequest from "./components/ViewEnrollmentRequest";
@@ -17,6 +17,7 @@ import Spinner from "./components/Spinner";
 import CoursePage from "./Pages/CoursePage";
 
 const App = () => {
+
   const { state, dispatch } = useAuthContext();
   const { isAuthenticated, loading } = state;
   console.log(state);
@@ -44,7 +45,7 @@ const App = () => {
           element={<TeacherDashboardCourse />}
         />
         <Route path="/teacher-dashboard" element={<TeacherDashboardMain />} />
-        <Route path="*" element={<h1>404 Not Found</h1>} />
+        <Route path="*" element={<NotFound />} />
 
         {/* admin routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -53,6 +54,7 @@ const App = () => {
       </Routes>
     </>
   );
+
 };
 
 export default App;
