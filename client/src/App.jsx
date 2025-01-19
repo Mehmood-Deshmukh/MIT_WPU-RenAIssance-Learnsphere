@@ -8,12 +8,13 @@ import StudentAssignment from "./Pages/StudentAssignment";
 import StudentDashboard from "./Pages/studentDashboard";
 import TeacherDashboardCourse from "./Pages/TeacherDashboardCourse";
 import TeacherDashboardMain from "./Pages/TeacherDashboardMain";
+import Timepass from "./components/SignupForm";
 // import ViewEnrollmentRequest from "./components/ViewEnrollmentRequest";
 
 const App = () => {
   const { state, dispatch } = useAuthContext();
   const { isAuthenticated, loading } = state;
-
+  console.log(state);
   if (loading) return <h1>Loading...</h1>;
 
   return (
@@ -38,6 +39,7 @@ const App = () => {
           element={<TeacherDashboardCourse />}
         />
         <Route path="/teacher-dashboard" element={<TeacherDashboardMain />} />
+        <Route path="/timepass" element={<Timepass />} />
       </Routes>
     </>
   );
