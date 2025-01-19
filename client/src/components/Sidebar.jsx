@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router';
 const SidebarComponent = ({ userRole }) => {
     const [visible, setVisible] = useState(false);
     const { dispatch, isAuthenticated, state } = useAuthContext();
-
     const navigate = useNavigate();
     function logout() {
         localStorage.clear();
