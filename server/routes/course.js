@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const {
+
   getCourse,
   isCourseApproved,
   createCourse,
@@ -11,6 +12,7 @@ const {
   approveEnrollmentRequest,
   getCourseAssignments,
   getAllCourses,
+      getAllUserCourses,
   getAllStudentsForCourse,
 } = require("../controllers/courseController");
 
@@ -18,6 +20,7 @@ const authenticateUser = require("../middlewares/authenticateUser");
 
 router.post("/create", authenticateUser, createCourse);
 router.get("/get-course/:courseId", isCourseApproved, getCourse);
+
 router.get(
   "/instructor/:instructorId",
   authenticateUser,
@@ -46,6 +49,9 @@ router.get(
   isCourseApproved,
   getCourseAssignments
 );
+router.get("/getAllUserCourses", authenticateUser, getAllUserCourses);
+AllUserCourses", authenticateUser, getAllUserCourses);
+
 router.get("/getAllCourses", authenticateUser, getAllCourses);
 
 router.get(
