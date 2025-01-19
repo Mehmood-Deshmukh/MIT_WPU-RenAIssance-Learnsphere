@@ -28,29 +28,29 @@ const App = () => {
       <Routes>
         <Route
           path="/"
-          element={isAuthenticated && !loading ? <Home /> : <Login />}
+          element={isAuthenticated && !loading ? <Navigate to="/home" /> : <Navigate to="/login" />}
         />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Singup />} />
+        <Route path="/login" element={!isAuthenticated ? <Login /> : (state?.user?.role == 'student' ? <Navigate to="/studentDashboard" /> : <Navigate to="/teacher-dashboard" />)} />
+        <Route path="/signup" element={!isAuthenticated ? <Singup /> : (state?.use?.role == 'student' ? <Navigate to="/studentDashboard" /> : <Navigate to="/teacher-dashboard" />)} />
 
         <Route
           path="/home"
           element={isAuthenticated ? <Home /> : <Navigate to="/login" />}
         />
-        <Route path="/studentAssignment/:id" element={<StudentAssignment />} />
-        <Route path="/studentDashboard" element={<StudentDashboard />} />
+        <Route path="/studentAssignment/:id" element={isAuthenticated ? <StudentAssignment /> : <Navigate to="/login" />} />
+        <Route path="/studentDashboard" element={isAuthenticated ? <StudentDashboard /> : <Navigate to="/login" />} />
         <Route
           path="/teacherdashboard/:courseid"
-          element={<TeacherDashboardCourse />}
+          element={isAuthenticated ? <TeacherDashboardCourse /> : <Navigate to="/login" />}
         />
-        <Route path="/teacher-dashboard" element={<TeacherDashboardMain />} />
+        <Route path="/teacher-dashboard" element={isAuthenticated ? <TeacherDashboardMain /> : <Navigate to="/login" />} />
         <Route path="*" element={<NotFound />} />
 
         {/* admin routes */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/home" element={<AdminHome />} />
-        <Route path="/courses/:id" element={<CoursePage />} />
+        <Route path="/admin/login" element={!isAuthenticated ? <AdminLogin /> : (state?.user?.role == "student" ? <Navigate to="/studentDashboard" /> : <Navigate to="/teacher-dashboard" />)} />
+        <Route path="/admin/home" element={isAuthenticated && state?.user?.role == 'admin' ? <AdminHome /> : <Navigate to="/login" />} />
+        <Route path="/courses/:id" element={isAuthenticated ? <CoursePage /> : <Navigate to="/login" />} />
       </Routes>
     </>
   );
