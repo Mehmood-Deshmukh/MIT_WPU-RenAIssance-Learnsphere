@@ -34,12 +34,13 @@ const createCourse = async (req, res) => {
         });
 
         await course.save();
-        const request = new Request({
-            type: "COURSE_CREATION",
-            requestedBy: createdBy,
-            course: course._id,
-            reqeustedTo: "admin"
-        });
+        // const request = new Request({
+        //     type: "COURSE_CREATION",
+        //     requestedBy: createdBy,
+        //     course: course._id,
+        //     reqeustedTo: "admin"
+        // });
+        const request = await Request.createCourseCreationRequest(createdBy, course._id);
         await request.save();
 
         res.json({ message: "Request for course creation sent for approval", data: course });

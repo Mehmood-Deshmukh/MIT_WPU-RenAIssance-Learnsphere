@@ -65,12 +65,14 @@ Request.discriminator("TeacherSignupRequest", teacherSignupRequestSchema);
 Request.discriminator("CourseEnrollmentRequest", courseEnrollmentRequestSchema);
 
 Request.createCourseCreationRequest = async function (requestedBy, course) {
-    return this.create({
+    const CourseCreationRequest = this.discriminators.CourseCreationRequest;
+    return CourseCreationRequest.create({
         type: "COURSE_CREATION",
         requestedBy,
         course,
     });
 };
+
 
 Request.createTeacherSignupRequest = async function (requestedBy) {
     return this.create({
@@ -80,7 +82,8 @@ Request.createTeacherSignupRequest = async function (requestedBy) {
 };
 
 Request.createCourseEnrollmentRequest = async function (requestedBy, course) {
-    return this.create({
+    const CourseEnrollmentRequest = this.discriminators.CourseEnrollmentRequest;
+    return CourseEnrollmentRequest.create({
         type: "COURSE_ENROLLMENT",
         requestedBy,
         course,
