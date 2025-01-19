@@ -478,6 +478,20 @@ const StudentAssignment = () => {
                     ))}
                   </ul>
                 </Card>
+                <Card className="shadow-lg border-0">
+                  <h3 className="text-xl font-semibold mb-6">What's wrong</h3>
+                  <ul className="space-y-4">
+                    {aiReview.areasOfImprovement.map((area, index) => (
+                      <li key={index} className="flex items-start gap-3 justify-between items-center">
+                        <div>
+                        <i className="pi pi-info-circle mt-1 text-blue-500 mx-[1vw]" />
+                        <span className="text-gray-700">{area}</span>
+                        </div>
+                        <Button label='get help' className="p-button-outlined p-button-info p-3" />
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
               </div>
             </div>
           )}

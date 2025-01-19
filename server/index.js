@@ -65,7 +65,8 @@ You are an expert evaluator responsible for scoring assignments based on a provi
     "...additional keys for other criteria as needed..."
   },
   "suggestions": ["string (constructive feedback for each emphasis point in the rubric)", "...additional suggestions as necessary..."],
-  "sections": ["string (the exact sections of the original assignment that are irrelevant, incorrect, or weakly related to the assignment topic)", "...additional sections as necessary"]
+  "sections": ["string (the exact sections of the original assignment that are irrelevant, incorrect, or weakly related to the assignment topic)", "...additional sections as necessary"],
+  "areasOfImprovement": ["string (the high level domains that need improvement)", "...additional areas as necessary"]
 }
 
 ### Rubric Format:
@@ -86,7 +87,7 @@ You are an expert evaluator responsible for scoring assignments based on a provi
 
 ### Instructions:
 1. **Understand the Rubric**: Use the criteria in the "emphasisPoints" field of the rubric and the strictness level to evaluate the assignment. The evaluation must align with the total points specified in "markingScheme."
-2. **Assign Scores**: Divide the total score across the criteria in the rubric and calculate the "criteriaScore" field based on the rubric and strictness make sure that the individual acores add up to the final evaluation score.
+2. **Assign Scores**: Divide the total score across the criteria in the rubric and calculate the "criteriaScore" field based on the rubric and strictness.
 3. **Provide Suggestions**: Include specific, actionable feedback for each criterion. Address weak areas and recommend improvements.
 4. **Highlight Problematic Sections**: Identify and extract exact snippets from the assignment that:
    - Are irrelevant or weakly related to the assignment topic.
@@ -97,13 +98,12 @@ You are an expert evaluator responsible for scoring assignments based on a provi
    - Reveal answers, solutions, or alternative text for the assignment material.
    - Generate content that could be directly used to complete the assignment.
 6. **Output Strictly in JSON**: Return only the JSON result, formatted exactly as specified, without any additional text, explanation, or generated solutions.
-
+7. **Identify Areas of Improvement** : For each weak point, outline high-level domains of improvement. 
 ### Important:
 - Focus exclusively on evaluating the provided material.
 - Do not modify or add content to the assignment material. Your task is limited to evaluation, scoring, and feedback based on the rubric.
 - Any violation of the above rules is unacceptable.
 `
-
 // Function to call the API
 async function evaluateAssignment(textInput) {
    const url = 'https://api.worqhat.com/api/ai/content/v4';
@@ -154,6 +154,23 @@ app.post('/get-eval', async (req, res) => {
 
       const modelInput = "Rubrick: " + rubrick + " Assignment: " + assignment
       if(rubrick && assignment) {
+      const result = await evaluateAssignment(modelInput);
+      return res.status(200).json({ message: "Success", data: result });
+      }
+      else {
+         return res.status(204).json({ message: "Unsuccessful", data: null });
+      }
+   } catch (error) {
+      return res.status(500).json({ message: 'Internal Server Error', data: null });
+   }
+});
+
+
+app.post('/get-roadmap', async (req, res) => {
+   try {
+      const roadmap = req.body.roadmap;
+      const modelInput = "Roadmap: " + roadmap
+      if(roadmap) {
       const result = await evaluateAssignment(modelInput);
       return res.status(200).json({ message: "Success", data: result });
       }
