@@ -65,6 +65,7 @@ const StudentAssignment = () => {
 
   const handleUpload = async (event) => {
     try {
+      const previousSubmitStatus = isSubmitted;
       const file = event.files[0];
       const formData = new FormData();
       formData.append('file', file);
@@ -345,7 +346,7 @@ const StudentAssignment = () => {
                 maxFileSize={5000000}  // 5MB max size - adjust as needed
                 emptyTemplate={<p className="m-0">Drag and drop files here to upload.</p>}
                 chooseLabel="Select File"
-                uploadLabel= {isSubmitted ? "Final Submit" : "Submit"}
+                uploadLabel= {isSubmitted ? "Resubmit" : "Submit"}
                 cancelLabel="Clear"
                 className="w-full"
                 />
