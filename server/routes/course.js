@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 
 const {
-
   getCourse,
   isCourseApproved,
   createCourse,
@@ -12,7 +11,7 @@ const {
   approveEnrollmentRequest,
   getCourseAssignments,
   getAllCourses,
-      getAllUserCourses,
+  getAllUserCourses,
   getAllStudentsForCourse,
 } = require("../controllers/courseController");
 
@@ -50,7 +49,6 @@ router.get(
   getCourseAssignments
 );
 router.get("/getAllUserCourses", authenticateUser, getAllUserCourses);
-AllUserCourses", authenticateUser, getAllUserCourses);
 
 router.get("/getAllCourses", authenticateUser, getAllCourses);
 

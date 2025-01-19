@@ -138,17 +138,6 @@ const getCourseAssignments = async (req, res) => {
   }
 };
 
-const getAllCourses = async (req, res) => {
-  try {
-    const courseIds = await userModel.findById(req.user.id).populate("courses");
-    const courses = await Course.find({ _id: { $in: courseIds } });
-
-    res.json({ message: "success", data: courses });
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  }
-};
-
 const getAllStudentsForCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -165,25 +154,25 @@ const getAllStudentsForCourse = async (req, res) => {
 };
 
 const getAllCourses = async (req, res) => {
-    try{
-        const courses = await Course.find({ isApproved: true });
+  try {
+    const courses = await Course.find({ isApproved: true });
 
-        res.json({ message: "success", data: courses });
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-    }
-}
+    res.json({ message: "success", data: courses });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
 
 const getAllUserCourses = async (req, res) => {
-    try{
-        const courseIds = await userModel.findById(req.user.id).populate('courses');
-        const courses = await Course.find({ _id: { $in: courseIds } });
+  try {
+    const courseIds = await userModel.findById(req.user.id).populate("courses");
+    const courses = await Course.find({ _id: { $in: courseIds } });
 
-        res.json({ message: "success", data: courses });
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-    }
-}
+    res.json({ message: "success", data: courses });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
 
 // rememeber to check is isApproved field of course is true or not
 module.exports = {
@@ -197,6 +186,5 @@ module.exports = {
   getCourseAssignments,
   getAllCourses,
   getAllStudentsForCourse,
-  getAllUserCourses
+  getAllUserCourses,
 };
-

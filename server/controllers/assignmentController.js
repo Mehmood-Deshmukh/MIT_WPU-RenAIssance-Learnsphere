@@ -153,24 +153,20 @@ const getAssignmentsByCourseID = async (req, res) => {
 };
 
 const getPendingAssignments = async (req, res) => {
-
-    try {
-        const courses = await userModel.findById(req.user.id).populate('courses');
-        const user = await userModel.findById(req.user.id);
-        let pendingAssignments = [];
-        for (let i = 0; i < courses.length; i++) {
-            const course = courses[i];
-            const assignments = course.assignments;
-            for (let j = 0; j < assignments.length; j++) {
-                const assignment = assignments[j];
-                if (!user.assignments.includes(assignment)) {
-                    pendingAssignments.push(Assignment.findById(assignment));
-                }
-            }
+  try {
+    const courses = await userModel.findById(req.user.id).populate("courses");
+    const user = await userModel.findById(req.user.id);
+    let pendingAssignments = [];
+    for (let i = 0; i < courses.length; i++) {
+      const course = courses[i];
+      const assignments = course.assignments;
+      for (let j = 0; j < assignments.length; j++) {
+        const assignment = assignments[j];
+        if (!user.assignments.includes(assignment)) {
+          pendingAssignments.push(Assignment.findById(assignment));
         }
       }
     }
-
     res.status(200).json({
       message: "Pending Assignments fetched successfully",
       data: pendingAssignments,
