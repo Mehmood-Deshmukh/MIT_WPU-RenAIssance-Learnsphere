@@ -10,8 +10,13 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import ViewEnrollmentRequest from "../components/ViewEnrollmentRequest";
+import useAuthContext from "../hooks/useAuthContext";
+import { useNavigate } from "react-router";
+import axios from "axios";
 
 const TeacherDashboardCourse = () => {
+  const { state } = useAuthContext();
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [viewEnrollmentForm, setviewEnrollmentForm] = useState(false);
   const [newAssignment, setNewAssignment] = useState({
@@ -19,8 +24,11 @@ const TeacherDashboardCourse = () => {
     description: "",
     deadline: null,
   });
-  const toast = React.useRef(null);
 
+  const toast = React.useRef(null);
+  if (!state || !state.user || state.user.role !== "teacher") {
+    return navigate("/login");
+  }
   // Dummy data
   const courseTitle = "Introduction to React";
   const enrolledStudents = [
@@ -34,16 +42,29 @@ const TeacherDashboardCourse = () => {
     { id: 3, title: "Hooks in Depth", status: "Active", submissions: 1 },
   ];
 
-  const handleCreateAssignment = () => {
-    // Here you would typically send the new assignment data to your backend
-    // /api/assignments/create-assignment
-    console.log("New Assignment:", newAssignment);
-    toast.current.show({
-      severity: "success",
-      summary: "Success",
-      detail: "Assignment Created",
-      life: 3000,
-    });
+  const handleCreateAssignment = async () => {
+    // const data = {
+    //   title: newAssignment.title,
+    //   description: newAssignment.description,
+    //   deadline: newAssignment.deadline,
+    // };
+    const data = `Title: ${newAssignment.title},\n ${newAssignment.description}`;
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/get-rubrick",
+        {
+          prompt: data,
+        },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${state.token}` },
+        }
+      );
+      console.log(response);
+    } catch (err) {
+      console.log(err);
+    }
+
     setShowModal(false);
     setNewAssignment({ title: "", description: "", deadline: null });
   };
