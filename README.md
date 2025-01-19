@@ -109,6 +109,35 @@ Assuming you have cloned the repository and you are in the root directory of the
     http://localhost:<PORT>/
     ```
 
+### **Important Note:** 
+**Super Admin Signup:** The super admin can only be created when you make a POST request to the `/api/admin/signup` route with the token in the header (Bearer token).
+
+This token is the `SUPER_ADMIN_TOKEN` that you have added in the `.env` file.
+
+```JSON
+{
+    ...
+    "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer <super_admin_token>"
+    },
+    "body": {
+        "Name" : "<Name>",
+        "email" : "<Email>",
+        "password" : "<Password>",
+        "role": "admin",
+        "rollNo": "<some_roll_no>"
+    }
+}
+```
+
+You can use tools like **Postman** to make the POST request to the `/api/admin/signup` route of the backend.
+
+This is the only way to create the super admin. The main reason to keep the super admin signup this way is to prevent unauthorized access to the super admin role.
+
+For accessing the super admin pages on the frontend, you need to head to the `http://localhost:5173/admin/login` and login with the super admin credentials.
+
+Once you are logged in, you can approve the teacher signup requests and create the courses.
 
 ## Contributors
 1. **[Aryan Mehta](https://github.com/arymehta)**
