@@ -96,8 +96,8 @@ const assignmentSchema = new Schema({
     },
 
     rubrick : {
-        type : mongoose.Schema.ObjectId,
-        required : true
+        type: Object,
+        required: true,
     },
     /*
     this is "not sure" field teacher can specify a buffer time for submission although assignment should

@@ -32,7 +32,9 @@ router.route("/authenticate-user").post(async (req, res) => {
     res.status(200).json({ user });
   } catch (err) {
     console.log(err);
-    res.status(404).send({ message: err.message });
+    res
+      .status(404)
+      .send({ message: "error on authenticate user route: " + err.message });
   }
 });
 

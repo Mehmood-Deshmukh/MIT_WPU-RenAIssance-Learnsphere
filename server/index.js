@@ -68,7 +68,8 @@ You are an expert evaluator responsible for scoring assignments based on a provi
     "...additional keys for other criteria as needed..."
   },
   "suggestions": ["string (constructive feedback for each emphasis point in the rubric)", "...additional suggestions as necessary..."],
-  "sections": ["string (the exact sections of the original assignment that are irrelevant, incorrect, or weakly related to the assignment topic)", "...additional sections as necessary"]
+  "sections": ["string (the exact sections of the original assignment that are irrelevant, incorrect, or weakly related to the assignment topic)", "...additional sections as necessary"],
+  "areasOfImprovement": ["string (the high level domains that need improvement)", "...additional areas as necessary"]
 }
 
 ### Rubric Format:
@@ -89,7 +90,7 @@ You are an expert evaluator responsible for scoring assignments based on a provi
 
 ### Instructions:
 1. **Understand the Rubric**: Use the criteria in the "emphasisPoints" field of the rubric and the strictness level to evaluate the assignment. The evaluation must align with the total points specified in "markingScheme."
-2. **Assign Scores**: Divide the total score across the criteria in the rubric and calculate the "criteriaScore" field based on the rubric and strictness make sure that the individual acores add up to the final evaluation score.
+2. **Assign Scores**: Divide the total score across the criteria in the rubric and calculate the "criteriaScore" field based on the rubric and strictness.
 3. **Provide Suggestions**: Include specific, actionable feedback for each criterion. Address weak areas and recommend improvements.
 4. **Highlight Problematic Sections**: Identify and extract exact snippets from the assignment that:
    - Are irrelevant or weakly related to the assignment topic.
@@ -100,13 +101,12 @@ You are an expert evaluator responsible for scoring assignments based on a provi
    - Reveal answers, solutions, or alternative text for the assignment material.
    - Generate content that could be directly used to complete the assignment.
 6. **Output Strictly in JSON**: Return only the JSON result, formatted exactly as specified, without any additional text, explanation, or generated solutions.
-
+7. **Identify Areas of Improvement** : For each weak point, outline high-level domains of improvement. 
 ### Important:
 - Focus exclusively on evaluating the provided material.
 - Do not modify or add content to the assignment material. Your task is limited to evaluation, scoring, and feedback based on the rubric.
 - Any violation of the above rules is unacceptable.
 `
-
 // Function to call the API
 async function evaluateAssignment(textInput) {
    const url = 'https://api.worqhat.com/api/ai/content/v4';
@@ -165,6 +165,132 @@ app.post('/get-eval', async (req, res) => {
       }
    } catch (error) {
       return res.status(500).json({ message: 'Internal Server Error', data: null });
+   }
+});
+
+const generateRoadmapPrompt = (topic) => `
+You are an expert programming instructor tasked with creating a detailed learning roadmap. Please analyze the following topic and create a structured learning path. Return the response in the following JSON format:
+
+{
+  "roadmapTitle": "Learning Path: [Topic Name]",
+  "estimatedTime": "X weeks/months",
+  "difficulty": "Beginner/Intermediate/Advanced",
+  "prerequisites": [
+    {
+      "skill": "Required skill/knowledge",
+      "description": "Brief explanation of why this is needed"
+    }
+  ],
+  "mainConcepts": [
+    {
+      "title": "Concept name",
+      "timeEstimate": "X hours/days",
+      "importance": "Critical/Important/Good to know",
+      "description": "Brief explanation of the concept"
+    }
+  ],
+  "learningPhases": [
+    {
+      "phase": "Phase name (e.g., 'Fundamentals')",
+      "duration": "X weeks",
+      "topics": [
+        {
+          "name": "Topic name",
+          "description": "What you'll learn",
+          "resources": [
+            {
+              "type": "Documentation/Video/Tutorial/Practice",
+              "title": "Resource name",
+              "description": "Brief description of the resource"
+            }
+          ],
+          "practiceProjects": [
+            {
+              "title": "Project name",
+              "difficulty": "Easy/Medium/Hard",
+              "description": "What to build",
+              "keyLearnings": ["Learning point 1", "Learning point 2"]
+            }
+          ]
+        }
+      ],
+      "milestones": [
+        {
+          "description": "What you should be able to do after this phase",
+          "checkpoints": ["Specific skill 1", "Specific skill 2"]
+        }
+      ]
+    }
+  ],
+  "additionalResources": [
+    {
+      "category": "Books/Websites/Tools",
+      "resources": [
+        {
+          "name": "Resource name",
+          "description": "Why this resource is helpful"
+        }
+      ]
+    }
+  ],
+  "nextSteps": [
+    {
+      "path": "Potential next learning path",
+      "description": "Why this could be a good next step"
+    }
+  ],
+  "commonChallenges": [
+    {
+      "challenge": "Common difficulty students face",
+      "solution": "How to overcome it",
+      "preventiveTips": ["Tip 1", "Tip 2"]
+    }
+  ]
+}
+
+Topic to create roadmap for: ${topic}
+
+Ensure the roadmap is:
+1. Progressive - Concepts build upon each other
+2. Practical - Includes hands-on projects and exercises
+3. Comprehensive - Covers fundamental to advanced concepts
+4. Realistic - Time estimates are practical for self-paced learning
+5. Specific - Resources and projects are clearly defined
+6. Structured - Clear phases with defined objectives and milestones
+
+The response must strictly follow the JSON format above to ensure proper parsing and display in the application.`;
+
+
+app.post('/get-roadmap', async (req, res) => {
+   try {
+      const topic = req.body.topic;
+      if (!topic) {
+         return res.status(400).json({ 
+            message: "Topic is required", 
+            data: null 
+         });
+      }
+
+      const modelInput = generateRoadmapPrompt(topic);
+      const result = await evaluateAssignment(modelInput);
+      
+      try {
+         // Verify the response is valid JSON
+         return res.status(200).json({ 
+            message: "Success", 
+            data: result 
+         });
+      } catch (parseError) {
+         return res.status(422).json({ 
+            message: "Invalid response format", 
+            data: null 
+         });
+      }
+   } catch (error) {
+      return res.status(500).json({ 
+         message: 'Internal Server Error', 
+         data: null 
+      });
    }
 });
 
