@@ -80,7 +80,8 @@ const assignmentSchema = new Schema({
         required: true,
     },
     attachments: {
-        type: Array, // schema for attachments / files needs to be defined
+        type: [Schema.Types.ObjectId],
+        ref: "Attachment",
     },
     createdBy: {
         type: String,
