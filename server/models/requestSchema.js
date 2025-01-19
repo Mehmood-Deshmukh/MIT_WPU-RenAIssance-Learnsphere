@@ -91,6 +91,7 @@ Request.createCourseEnrollmentRequest = async function (requestedBy, course) {
 };
 
 Request.approveRequest = async function (requestId, feedback) {
+    console.log("Approve Request:", requestId, feedback);
     const request = await this.findById(requestId);
     if (!request) {
         throw new Error("Request Not Found");
@@ -158,6 +159,15 @@ Request.rejectRequest = async function (requestId, feedback) {
     request.feedback = feedback;
     await request.save();
 
+    if(request.type === "COURSE_CREATION") {
+        const course = await Course.findById(request.course);
+        course?.remove();
+    }
+
+    if(request.type === "TEACHER_SIGNUP") {
+        const user = await User.findById(request.requestedBy);
+        user?.remove();
+    }
     return request;
 };
 
@@ -171,7 +181,7 @@ Request.deleteRequest = async function (requestId) {
 };
 
 Request.getRequests = async function (requestedTo) {
-    return this.find({ requestedTo }).sort({ createdAt: -1 });
+    return this.find({ requestedTo }).sort({ createdAt: -1 }).populate("requestedBy", "name email");
 }
 
 module.exports = Request;

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const {
+    getCourse,
     isCourseApproved,
     createCourse,
     getCoursesByInstructor,
@@ -15,6 +16,7 @@ const {
 const authenticateUser = require("../middlewares/authenticateUser");
 
 router.post("/create", authenticateUser, createCourse);
+router.get("/get-course/:courseId", isCourseApproved, getCourse);
 router.get("/instructor/:instructorId", authenticateUser, getCoursesByInstructor);
 router.post("/enroll-student/:courseId",authenticateUser, isCourseApproved, enrollStudent);
 router.get("/enrollment-requests/:instructorId", authenticateUser, getEnrollmentRequests);

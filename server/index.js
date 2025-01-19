@@ -6,6 +6,7 @@ const attachmentRoutes = require("./routes/attachmentRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
 const courseRoutes = require("./routes/course");
 const adminRoutes = require("./routes/admin");
+const teacher = require("./routes/teacher");
 
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -45,6 +46,7 @@ app.use("/api/assignment", assignmentRoutes);
 app.use("/api/request", requestRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/course", courseRoutes);
+app.use("/api/teacher", teacher);
 
 app.get("/", (req, res) => {
   res.send("Welcome");
