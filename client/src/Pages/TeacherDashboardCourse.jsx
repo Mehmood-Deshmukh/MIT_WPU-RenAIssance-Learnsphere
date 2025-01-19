@@ -26,7 +26,6 @@ const TeacherDashboardCourse = () => {
   });
   useEffect(() => {
     getCoursefromId(courseid);
-    fetchStudents();
   }, []);
 
   const [allStudents, setAllStudents] = useState([]);
@@ -48,7 +47,6 @@ const TeacherDashboardCourse = () => {
           headers: { Authorization: `Bearer ${state.token}` },
         }
       );
-      console.log("My data: " + response.data);
       setAllStudents(response.data.data);
     } catch (err) {
       console.log(err);
