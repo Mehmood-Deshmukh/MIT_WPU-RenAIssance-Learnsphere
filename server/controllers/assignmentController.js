@@ -53,10 +53,9 @@ const getAssignments = async (req, res) => {
 
 const getAssignmentById = async (req, res) => {
     try {
-        // schema validation pending
-
         const assignment = await Assignment.findById(req.params.id);
         res.status(200).json({ message: "Assignment fetched successfully", data: assignment });
+
     }catch(e) {
         console.log(e);
         res.status(500).json({ message: "Internal Server Error", data: null });

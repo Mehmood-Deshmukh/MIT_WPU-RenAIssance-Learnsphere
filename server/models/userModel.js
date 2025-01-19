@@ -34,7 +34,10 @@ const userSchema = new Schema({
     required: true,
     unique: true,
   },
-  assignment: {},
+  assignments: {
+		type: [Schema.Types.ObjectId],
+		ref: "Assignment",
+	},
 	// following fields are only for teacher
 	subjects: {
 		type: [String],
