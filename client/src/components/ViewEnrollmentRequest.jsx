@@ -28,7 +28,7 @@ const ViewEnrollmentRequest = ({ visible, onHide, courseId, teacherId }) => {
       }
     };
     fetchData();
-  });
+  }, []);
 
   const handleApprove = (requestId) => {
     setRequests(

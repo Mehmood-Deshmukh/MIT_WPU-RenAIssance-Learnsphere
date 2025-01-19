@@ -156,28 +156,20 @@ const fileController = {
                 return res.status(400).json({ message: 'Invalid assignment ID' });
             }
 
-            const db = mongoose.connection.db;
-            const bucket = new mongoose.mongo.GridFSBucket(db, {
-                bucketName: 'uploads'
-            });
-
-            const files = await bucket
-                .find({ 'metadata.assignmentId': assignmentId })
-                .toArray();
-
-            if (!res.headersSent) {
-                res.json({
-                    count: files.length,
-                    files: files.map(file => ({
-                        id: file._id,
-                        filename: file.filename,
-                        originalname: file.metadata.originalname,
-                        contentType: file.metadata.contentType,
-                        size: file.length,
-                        uploadDate: file.uploadDate
-                    }))
-                });
+            const assignment = await Assignment.findById(assignmentId).populate({
+                path: 'attachments',
+                populate: {
+                  path: 'uploadedBy',
+                  select: 'Name email' 
+                }
+              });
+            if (!assignment) {
+                return res.status(404).json({ message: 'Assignment not found' });
             }
+
+            return res.json(assignment.attachments);
+
+
         } catch (error) {
             console.error('Error getting assignment files:', error);
             if (!res.headersSent) {
