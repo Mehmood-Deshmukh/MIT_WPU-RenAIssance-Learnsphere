@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { Avatar } from "primereact/avatar";
 import { DataView } from "primereact/dataview";
-import { Tag } from "primereact/tag";
 import { Button } from "primereact/button";
-import { ProgressBar } from "primereact/progressbar";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -99,38 +97,9 @@ const TeacherDashboardMain = () => {
 
   const profileImage = `https://avatar.iran.liara.run/username?username=${
     currentUser.Name.split()[0]
-  }+${currentUser.Name.split()[1]}`;
-
-  // Sample teacher data - in real app, this would come from API/props
-  const [teacherData] = useState({
-    id: "T123",
-    name: "Abhijit A.M",
-    email: "sarah.johnson@example.edu",
-    department: "Computer Science",
-    joinDate: "2023-09-01",
-    expertise: ["Web Development", "Data Structures", "Machine Learning"],
-    stats: {
-      totalStudents: 245,
-      averageRating: 4.8,
-      coursesCount: 6,
-      completionRate: 92,
-    },
-  });
+  }}`;
 
   // Sample courses data
-
-  const getStatusSeverity = (status) => {
-    switch (status) {
-      case "active":
-        return "success";
-      case "upcoming":
-        return "warning";
-      case "completed":
-        return "info";
-      default:
-        return null;
-    }
-  };
 
   const courseTemplate = (course) => {
     return (
@@ -169,10 +138,17 @@ const TeacherDashboardMain = () => {
             </div>
 
             <div className="mt-auto pt-3">
-              <Button
-                label="View Details"
-                className="p-button-outlined w-full"
-              />
+              {course.isApproved ? (
+                <Button
+                  label="View Details"
+                  className="p-button-outlined w-full"
+                  onClick={() => navigate(`/teacherdashboard/${course._id}`)}
+                />
+              ) : (
+                <div className="text-orange-500 border-2 p-2 text-center font-semibold rounded-md border-orange-500">
+                  Waiting for Approval
+                </div>
+              )}
             </div>
           </div>
         </Card>
@@ -213,8 +189,8 @@ const TeacherDashboardMain = () => {
                   </div>
                   <div className="col-12 md:col-6">
                     <p>
-                      <strong>Active Courses:</strong>{" "}
-                      {teacherData.stats.coursesCount}
+                      <strong>Active Courses: </strong>
+                      {courses.length}
                     </p>
                   </div>
                 </div>
