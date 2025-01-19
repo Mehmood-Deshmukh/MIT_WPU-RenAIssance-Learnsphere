@@ -3,10 +3,10 @@ import { Routes, Route, Navigate } from "react-router";
 import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Singup from "./Pages/Signup";
-
 import useAuthContext from "./hooks/useAuthContext";
-import CoursePage from "./Pages/CoursePage";
 import StudentAssignment from "./Pages/StudentAssignment";
+import StudentDashboard from "./Pages/studentDashboard";
+import CoursePage from "./Pages/CoursePage";
 
 const App = () => {
   const { state, dispatch } = useAuthContext();
@@ -33,6 +33,7 @@ const App = () => {
 					}
 				/>
         <Route path="/studentAssignment/:id" element={<StudentAssignment />} />
+		<Route path="/studentDashboard" element={<StudentDashboard />} />
         <Route path="/courses/:id" element={<CoursePage />} />
 			</Routes>
 		</>

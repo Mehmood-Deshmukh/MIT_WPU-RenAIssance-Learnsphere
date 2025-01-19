@@ -1,6 +1,6 @@
 
 const express = require('express');
-const { createAssignment, getAssignments, getAssignmentById, updateAssignment, deleteAssignment, getAssignmentsByCourseID } = require('../controllers/assignmentController');
+const { createAssignment, getAssignments, getAssignmentById, updateAssignment, deleteAssignment, getPendingAssignments, getAssignmentsByCourseID } = require('../controllers/assignmentController');
 const authenticateUser = require('../middlewares/authenticateUser');
 const verifyRole = require('../middlewares/verifyRole');
 const router = express.Router();
@@ -12,5 +12,7 @@ router.get("/get-assignments-by-course-id/:id", authenticateUser, getAssignments
 router.post('/create-assignment', authenticateUser, verifyRole('teacher'), createAssignment);
 router.put('/update-assignment/:id', authenticateUser, verifyRole('teacher'), updateAssignment);
 router.delete('/delete-assignment/:id', authenticateUser, verifyRole('teacher'), deleteAssignment);
+router.get('/getPendingAssignments', authenticateUser, verifyRole('student'), getPendingAssignments);
+
 
 module.exports = router;

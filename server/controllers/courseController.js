@@ -1,5 +1,6 @@
 const Course = require("../models/courseModel");
 const Request = require("../models/requestSchema");
+const userModel = require("../models/userModel");
 
 const isCourseApproved = async (req, res, next) => {
     try{
@@ -51,12 +52,8 @@ const createCourse = async (req, res) => {
         });
 
         await course.save();
-        const request = new Request({
-            type: "COURSE_CREATION",
-            requestedBy: createdBy,
-            course: course._id,
-            reqeustedTo: "admin"
-        });
+
+        const request = await Request.createCourseCreationRequest(createdBy, course._id);
         await request.save();
 
         res.json({ message: "Request for course creation sent for approval", data: course });
@@ -84,12 +81,8 @@ const enrollStudent = async (req, res) => {
             throw new Error("Course not found");
         }
 
-        const request = new Request({
-            type: "COURSE_ENROLLMENT",
-            requestedBy: studentId,
-            course: courseId,
-            reqeustedTo: "teacher"
-        });
+
+        const request = await Request.createCourseEnrollmentRequest(studentId, courseId, course.instructors);
         await request.save();
 
         res.json({ message: "Request for course enrollment sent for approval", data: course });
@@ -131,6 +124,17 @@ const getCourseAssignments = async (req, res) => {
     }
 }
 
+const getAllCourses = async (req, res) => {
+    try{
+        const courseIds = await userModel.findById(req.user.id).populate('courses');
+        const courses = await Course.find({ _id: { $in: courseIds } });
+
+        res.json({ message: "success", data: courses });
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+}
+
 // rememeber to check is isApproved field of course is true or not
 module.exports = {
     getCourse,
@@ -141,4 +145,5 @@ module.exports = {
     getEnrollmentRequests,
     approveEnrollmentRequest,
     getCourseAssignments,
+    getAllCourses
 }

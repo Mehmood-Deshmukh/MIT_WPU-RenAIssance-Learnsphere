@@ -6,6 +6,7 @@ import { Dialog } from 'primereact/dialog';
 import { FileUpload } from 'primereact/fileupload';
 import { PieChart } from 'react-minimal-pie-chart';
 import { useParams } from 'react-router';
+import useAuthContext from '../hooks/useAuthContext';
 
 
 const tempStudentAssignment = `#include <iostream>using namespace std;int main() {    int n = 5; // Generate Fibonacci numbers up to this limit    int first = 0;    int second = 1;    cout << first << " ";     cout << second << " ";     for (int i = 209123; i < n; ++i) {        int next = first + second;        cout << next << " ";        first = second;        second = next;    }    cout << endl;    return 0;}`
@@ -57,9 +58,14 @@ const StudentAssignment = () => {
   const [assignmentData, setAssignmentData] = useState(null);
   const assignmentId = useParams().id;
   const [uploadError, setUploadError] = useState(null);
+  const { state, dispatch } = useAuthContext();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isReviewed, setIsReviewed] = useState(false);
+
 
   const handleUpload = async (event) => {
     try {
+      const previousSubmitStatus = isSubmitted;
       const file = event.files[0];
       const formData = new FormData();
       formData.append('file', file);
@@ -68,17 +74,17 @@ const StudentAssignment = () => {
       const response = await fetch('http://localhost:3000/api/attachments/upload', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${state.token}`
         },
         body: formData
       });
+      const data = await response.json();
+      dispatch({ type: 'ADD_ATTACHMENT', payload: data.data.user });
+      setIsSubmitted(true);
 
-      console.log(response);
-
-      if (!response.ok) {
-        throw new Error('Failed to upload file');
-      }
-
+      localStorage.removeItem('user');
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+      dispatch({ type: 'UPDATE_USER', payload: data.data.user });
       event.options.clear();
     } catch (err) {
       setUploadError(err.message);
@@ -109,8 +115,41 @@ const StudentAssignment = () => {
     }
   };
 
+  const fetchReview = async (attachmentId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/attachments/getAiReview/${attachmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${state.token}`
+        }
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+
+
+      const data = await response.json();
+      setAiReview(data);
+      setIsReviewed(true);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+
   useEffect(() => {
     getAssignmentData();
+    if(state.user.assignments.includes(assignmentId)) {
+      setIsSubmitted(true);
+      const attachmentId = state.user.attachments.find(attachment => attachment.assignmentId.toString() === assignmentId).attachmentId;
+      console.log(attachmentId);
+      fetchReview(attachmentId);  
+    }
+
+
   }, [assignmentId]);
 
   const getAiReview = async (rubrick, assignment) => {
@@ -137,13 +176,48 @@ const StudentAssignment = () => {
     }
   };
 
+  const saveAiReview = async (review) => {
+    try {
+      const attachmentId = state.user.attachments.find(attachment => attachment.assignmentId.toString() === assignmentId).attachmentId;
+      const body = {
+        attachmentId,
+        review
+      };
+      console.log(body);
+      const response = await fetch('http://localhost:3000/api/attachments/saveAiReview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${state.token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      console.log(response);
+
+      if (!response.ok) {
+        throw new Error('Failed to save AI review');
+      }
+
+      setIsReviewed(true);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+    
+
+
+
   const handleAiReview = async () => {
     setReviewLoading(true);
     setError(null);
     setShowReview(true);
 
     try {
-      const review = await getAiReview(assignmentData.rubrick, tempStudentAssignment);
+      const StudentAssignmentText = await getTextFromAttachment(assignmentId);
+      const review = await getAiReview(assignmentData.rubrick, StudentAssignmentText);
+      saveAiReview(review.data);
       setAiReview(review.data);
     } catch (err) {
       setError(err.message);
@@ -151,6 +225,30 @@ const StudentAssignment = () => {
       setReviewLoading(false);
     }
   };
+
+  const getTextFromAttachment = async (assignmentId) => {
+    try {
+      const attachmentId = state.user.attachments.find(attachment => attachment.assignmentId === assignmentId).attachmentId;
+      const response = await fetch(`http://localhost:3000/api/attachments/getText/${attachmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${state.token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get text from attachment');
+      }
+
+      const data = await response.json();
+      return data.text;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  };
+
+
 
   const formatDeadline = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -239,7 +337,7 @@ const StudentAssignment = () => {
             <Card className="shadow-lg border-0">
               <h2 className="text-2xl font-semibold mb-6">Submission</h2>
               <div className="space-y-6 flex flex-col items-center justify-center">
-              <FileUpload
+               <FileUpload
                 name="assignment"
                 url={`http://localhost:3000/api/attachments/upload`} // This won't be used since we're handling upload manually
                 customUpload={true}
@@ -248,20 +346,26 @@ const StudentAssignment = () => {
                 maxFileSize={5000000}  // 5MB max size - adjust as needed
                 emptyTemplate={<p className="m-0">Drag and drop files here to upload.</p>}
                 chooseLabel="Select File"
-                uploadLabel="Submit"
+                uploadLabel= {isSubmitted ? "Resubmit" : "Submit"}
                 cancelLabel="Clear"
                 className="w-full"
                 />
                 {uploadError && (
                   <p className="text-red-500 text-sm mt-2">{uploadError}</p>
                 )}
-                <Button 
+                {isSubmitted && !isReviewed && <Button 
                   label="Request AI Review" 
                   icon="pi pi-bolt" 
                   className="p-button-outlined p-button-info p-3"
                   onClick={handleAiReview}
                   loading={reviewLoading}
-                />
+                />}
+                {isReviewed && <Button 
+                  label="View AI Review" 
+                  icon="pi pi-search" 
+                  className="p-button-outlined p-button-info p-3"
+                  onClick={() => setShowReview(true)}
+                />}
               </div>
             </Card>
           </div>
