@@ -1,12 +1,14 @@
 const verifyRole = (...allowedRoles) => {
-    return (req, res, next) => {
-        const role = req.user.role;
-        if (allowedRoles.includes(role)) {
-            next();
-        } else {
-            res.status(403).json({ message: "You are not authorized to access this route!" });
-        }
+  return (req, res, next) => {
+    const role = req.user.role;
+    if (allowedRoles.includes(role)) {
+      next();
+    } else {
+      res
+        .status(403)
+        .json({ message: "You are not authorized to access this route!" });
     }
+  };
 };
 
 module.exports = verifyRole;
