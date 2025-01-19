@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Attachment = require("./attachmentModel");
+const courseModel = require("./courseModel");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -67,6 +68,11 @@ const userSchema = new Schema({
 		type: Boolean,
 		default: false,
 	},
+	courses: {
+		type: [Schema.Types.ObjectId],
+		ref: courseModel,
+	}
+
 });
 
 module.exports = mongoose.model("User", userSchema);
