@@ -92,7 +92,7 @@ const Login = () => {
 						</div>
 						<div className="mt-4 flex items-center w-full text-center">
 							<a
-								href="/auth/signup"
+								href="/signup"
 								className="text-xs text-gray-500 capitalize text-center w-full"
 							>
 								Don&apos;t have any account yet?

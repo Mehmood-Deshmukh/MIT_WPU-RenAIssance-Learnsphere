@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const {
+    getCourse,
     isCourseApproved,
     createCourse,
     getCoursesByInstructor,
@@ -13,6 +14,7 @@ const {
 
 
 router.post("/create", createCourse);
+router.get("/get-course/:courseId", isCourseApproved, getCourse);
 router.get("/instructor/:instructorId", getCoursesByInstructor);
 router.post("/enroll-student/:courseId", isCourseApproved, enrollStudent);
 router.get("/enrollment-requests/:instructorId", getEnrollmentRequests);

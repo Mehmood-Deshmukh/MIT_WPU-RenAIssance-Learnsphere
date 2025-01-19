@@ -105,6 +105,20 @@ const deleteAssignment = async (req, res) => {
     }
 }
 
+const getAssignmentsByCourseID = async (req, res) => {
+    try {
+
+        const assignments = await Assignment.find({ courseID: req.params.id });
+        if(!assignments) {
+            return res.status(404).json({"message" : "Course Not Found!", data : null });
+        }
+
+        return res.status(200).json({"message" : "Course Found", data : assignments});
+    } catch (e) {
+    return res.status(500).json({"message" : "Internal server error", data : null});
+    }
+}
 
 
-module.exports = { createAssignment, getAssignments, getAssignmentById, updateAssignment, deleteAssignment };
+
+module.exports = { createAssignment, getAssignments, getAssignmentById, updateAssignment, deleteAssignment, getAssignmentsByCourseID };

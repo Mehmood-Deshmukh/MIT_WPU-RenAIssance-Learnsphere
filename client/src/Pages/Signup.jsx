@@ -127,7 +127,7 @@ const Singup = () => {
 
             <div className="mt-4 flex items-center w-full text-center">
               <a
-                href="/auth/login"
+                href="/login"
                 className="text-xs text-gray-500 capitalize text-center w-full"
               >
                 Already have any account ?

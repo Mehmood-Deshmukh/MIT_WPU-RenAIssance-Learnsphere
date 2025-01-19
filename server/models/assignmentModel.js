@@ -88,6 +88,11 @@ const assignmentSchema = new Schema({
     submissions: {
         type: Array, // schema for submissions needs to be defined
     },
+
+    rubrick : {
+        type : mongoose.Schema.ObjectId,
+        required : true
+    },
     /*
     this is "not sure" field teacher can specify a buffer time for submission although assignment should
     be marked as late after the deadline

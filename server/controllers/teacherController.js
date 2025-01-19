@@ -23,7 +23,9 @@ const getTeacherRequests = async (req, res) => {
 
 const getTeacherById = async (req, res) => {
     try{
-        const teacher = await User.findById(req.params.id);
+        const id = req.params.instructorId;
+        // console.log(id);
+        const teacher = await User.findById(id);
         res.json({message: "success", data: teacher});
     }catch(e) {
         res.status(500).json({message: e.message});

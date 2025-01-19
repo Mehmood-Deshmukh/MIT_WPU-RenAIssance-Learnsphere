@@ -91,7 +91,8 @@ const approveRequest = async (req, res) => {
 	try {
 		const { requestId, feedback } = req.body;
 		const request = Request.approveRequest(requestId, feedback);
-
+		await request.save();
+		
 		res.json({ message: "success", data: request });
 	} catch (e) {
 		res.status(500).json({ message: e.message });

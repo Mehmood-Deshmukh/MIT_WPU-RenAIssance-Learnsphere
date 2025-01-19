@@ -5,6 +5,8 @@ import Login from "./Pages/Login";
 import Singup from "./Pages/Signup";
 
 import useAuthContext from "./hooks/useAuthContext";
+import CoursePage from "./Pages/CoursePage";
+import StudentAssignment from "./Pages/StudentAssignment";
 
 const App = () => {
   const { state, dispatch } = useAuthContext();
@@ -31,6 +33,7 @@ const App = () => {
 					}
 				/>
         <Route path="/studentAssignment/:id" element={<StudentAssignment />} />
+        <Route path="/courses/:id" element={<CoursePage />} />
 			</Routes>
 		</>
 	);
