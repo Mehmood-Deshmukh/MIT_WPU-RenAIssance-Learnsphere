@@ -60,10 +60,12 @@ const StudentAssignment = () => {
   const [uploadError, setUploadError] = useState(null);
   const { state, dispatch } = useAuthContext();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isReviewed, setIsReviewed] = useState(false);
 
 
   const handleUpload = async (event) => {
     try {
+      const previousSubmitStatus = isSubmitted;
       const file = event.files[0];
       const formData = new FormData();
       formData.append('file', file);
@@ -113,11 +115,41 @@ const StudentAssignment = () => {
     }
   };
 
+  const fetchReview = async (attachmentId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/attachments/getAiReview/${attachmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${state.token}`
+        }
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+
+
+      const data = await response.json();
+      setAiReview(data);
+      setIsReviewed(true);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+
   useEffect(() => {
     getAssignmentData();
     if(state.user.assignments.includes(assignmentId)) {
       setIsSubmitted(true);
+      const attachmentId = state.user.attachments.find(attachment => attachment.assignmentId.toString() === assignmentId).attachmentId;
+      console.log(attachmentId);
+      fetchReview(attachmentId);  
     }
+
+
   }, [assignmentId]);
 
   const getAiReview = async (rubrick, assignment) => {
@@ -144,6 +176,39 @@ const StudentAssignment = () => {
     }
   };
 
+  const saveAiReview = async (review) => {
+    try {
+      const attachmentId = state.user.attachments.find(attachment => attachment.assignmentId.toString() === assignmentId).attachmentId;
+      const body = {
+        attachmentId,
+        review
+      };
+      console.log(body);
+      const response = await fetch('http://localhost:3000/api/attachments/saveAiReview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${state.token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      console.log(response);
+
+      if (!response.ok) {
+        throw new Error('Failed to save AI review');
+      }
+
+      setIsReviewed(true);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+    
+
+
+
   const handleAiReview = async () => {
     setReviewLoading(true);
     setError(null);
@@ -152,6 +217,7 @@ const StudentAssignment = () => {
     try {
       const StudentAssignmentText = await getTextFromAttachment(assignmentId);
       const review = await getAiReview(assignmentData.rubrick, StudentAssignmentText);
+      saveAiReview(review.data);
       setAiReview(review.data);
     } catch (err) {
       setError(err.message);
@@ -280,19 +346,25 @@ const StudentAssignment = () => {
                 maxFileSize={5000000}  // 5MB max size - adjust as needed
                 emptyTemplate={<p className="m-0">Drag and drop files here to upload.</p>}
                 chooseLabel="Select File"
-                uploadLabel="Submit"
+                uploadLabel= {isSubmitted ? "Resubmit" : "Submit"}
                 cancelLabel="Clear"
                 className="w-full"
                 />
                 {uploadError && (
                   <p className="text-red-500 text-sm mt-2">{uploadError}</p>
                 )}
-                {isSubmitted && <Button 
+                {isSubmitted && !isReviewed && <Button 
                   label="Request AI Review" 
                   icon="pi pi-bolt" 
                   className="p-button-outlined p-button-info p-3"
                   onClick={handleAiReview}
                   loading={reviewLoading}
+                />}
+                {isReviewed && <Button 
+                  label="View AI Review" 
+                  icon="pi pi-search" 
+                  className="p-button-outlined p-button-info p-3"
+                  onClick={() => setShowReview(true)}
                 />}
               </div>
             </Card>

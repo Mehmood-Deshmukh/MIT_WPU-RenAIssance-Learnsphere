@@ -6,6 +6,7 @@ const attachmentRoutes = require("./routes/attachmentRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
 const courseRoutes = require("./routes/course");
 const adminRoutes = require("./routes/admin");
+const teacher = require("./routes/teacher");
 
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -45,6 +46,7 @@ app.use("/api/assignment", assignmentRoutes);
 app.use("/api/request", requestRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/course", courseRoutes);
+app.use("/api/teacher", teacher);
 
 app.get("/", (req, res) => {
   res.send("Welcome");
@@ -136,7 +138,6 @@ async function evaluateAssignment(textInput) {
       const result = await response.json();
       const content = result.content.replace(/```json\n/g, '').replace(/```\n/g, '');
       const jsonContent = JSON.parse(content);
-      console.log(jsonContent)
       return jsonContent;
    } catch (error) {
       console.error('Error:', error);
@@ -154,7 +155,6 @@ app.post('/get-eval', async (req, res) => {
     
 
       const modelInput = "Rubrick: " + rubrick + " Assignment: " + assignment
-      console.log(modelInput);
       if(rubrick && assignment) {
       const result = await evaluateAssignment(modelInput);
       return res.status(200).json({ message: "Success", data: result });

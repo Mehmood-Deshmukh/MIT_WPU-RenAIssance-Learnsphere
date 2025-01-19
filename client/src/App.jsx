@@ -9,6 +9,8 @@ import StudentDashboard from "./Pages/studentDashboard";
 import AdminLogin from "./Pages/Admin/Login";
 import AdminHome from "./Pages/Admin/Home";
 
+import CoursePage from "./Pages/CoursePage";
+
 const App = () => {
 	const { state, dispatch } = useAuthContext();
 	const { isAuthenticated, loading } = state;
@@ -38,6 +40,7 @@ const App = () => {
 				{/* admin routes */}
 				<Route path="/admin/login" element={<AdminLogin />} />
 				<Route path="/admin/home" element={<AdminHome />} />
+        <Route path="/courses/:id" element={<CoursePage />} />
 			</Routes>
 		</>
 	);

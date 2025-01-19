@@ -4,41 +4,41 @@ const courseModel = require("../models/courseModel");
 const userModel = require("../models/userModel");
 
 const createAssignment = async (req, res) => {
-	try {
-		// not implemented yet
-		// const {error} = createAssignmentSchema.validate(req.body);
+    try {
+        // not implemented yet
+        // const {error} = createAssignmentSchema.validate(req.body);
 
-		const teacher = req.user;
-		const {
-			title,
-			subject,
-			description,
-			deadline,
-			maxMarks,
-			attachments,
-			buffer,
-		} = req.body;
+        const teacher = req.user;
+        const {
+            title,
+            subject,
+            description,
+            deadline,
+            maxMarks,
+            attachments,
+            buffer,
+        } = req.body;
 
-		const newAssignment = new Assignment({
-			title,
-			subject,
-			description,
-			deadline,
-			maxMarks,
-			attachments,
-			createdBy: teacher._id,
-			buffer,
-		});
+        const newAssignment = new Assignment({
+            title,
+            subject,
+            description,
+            deadline,
+            maxMarks,
+            attachments,
+            createdBy: teacher._id,
+            buffer,
+        });
 
-		const savedAssignment = await newAssignment.save();
-		res.status(201).json({
-			message: "Assignment created successfully",
-			data: savedAssignment,
-		});
-	} catch (e) {
-		console.log(e);
-		res.status(500).json({ message: "Internal Server Error", data: null });
-	}
+        const savedAssignment = await newAssignment.save();
+        res.status(201).json({
+            message: "Assignment created successfully",
+            data: savedAssignment,
+        });
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({ message: "Internal Server Error", data: null });
+    }
 };
 
 const getAssignments = async (req, res) => {
@@ -47,7 +47,7 @@ const getAssignments = async (req, res) => {
 
         const assignments = await Assignment.find({ createdBy: req.user._id });
         res.status(200).json({ message: "Assignments fetched successfully", data: assignments });
-    }catch(e) {
+    } catch (e) {
         console.log(e);
         res.status(500).json({ message: "Internal Server Error", data: null });
     }
@@ -58,7 +58,7 @@ const getAssignmentById = async (req, res) => {
         const assignment = await Assignment.findById(req.params.id);
         res.status(200).json({ message: "Assignment fetched successfully", data: assignment });
 
-    }catch(e) {
+    } catch (e) {
         console.log(e);
         res.status(500).json({ message: "Internal Server Error", data: null });
     }
@@ -84,7 +84,7 @@ const updateAssignment = async (req, res) => {
 
         const updatedAssignment = await assignment.save();
         res.status(200).json({ message: "Assignment updated successfully", data: updatedAssignment });
-    }catch(e) {
+    } catch (e) {
         console.log(e);
         res.status(500).json({ message: "Internal Server Error", data: null });
     }
@@ -101,14 +101,28 @@ const deleteAssignment = async (req, res) => {
 
         await assignment.remove();
         res.status(200).json({ message: "Assignment deleted successfully", data: null });
-    }catch(e) {
+    } catch (e) {
         console.log(e);
         res.status(500).json({ message: "Internal Server Error", data: null });
     }
 }
 
+const getAssignmentsByCourseID = async (req, res) => {
+    try {
+
+        const assignments = await Assignment.find({ courseID: req.params.id });
+        if (!assignments) {
+            return res.status(404).json({ "message": "Course Not Found!", data: null });
+        }
+
+        return res.status(200).json({ "message": "Course Found", data: assignments });
+    } catch (e) {
+        return res.status(500).json({ "message": "Internal server error", data: null });
+    }
+}
+
 const getPendingAssignments = async (req, res) => {
-    try{
+    try {
         const courses = await userModel.findById(req.user.id).populate('courses');
         const user = await userModel.findById(req.user);
         let pendingAssignments = [];
@@ -117,7 +131,7 @@ const getPendingAssignments = async (req, res) => {
             const assignments = course.assignments;
             for (let j = 0; j < assignments.length; j++) {
                 const assignment = assignments[j];
-                if(!user.assignments.includes(assignment)){
+                if (!user.assignments.includes(assignment)) {
                     pendingAssignments.push(Assignment.findById(assignment));
                 }
             }
@@ -126,7 +140,7 @@ const getPendingAssignments = async (req, res) => {
         res.status(200).json({ message: "Pending Assignments fetched successfully", data: pendingAssignments });
     }
 
-    catch(e){
+    catch (e) {
         console.log(e);
         res.status(500).json({ message: "Internal Server Error", data: null });
     }
@@ -134,4 +148,4 @@ const getPendingAssignments = async (req, res) => {
 
 
 
-module.exports = { createAssignment, getAssignments, getAssignmentById, updateAssignment, deleteAssignment, getPendingAssignments };
+module.exports = { createAssignment, getAssignments, getAssignmentById, updateAssignment, deleteAssignment , getPendingAssignments, getAssignmentsByCourseID};

@@ -24,36 +24,36 @@ const Dashboard = () => {
     { id: 3, title: 'Dataset Analysis', course: 'Machine Learning Basics', dueDate: '2025-01-28', status: 'pending' }
   ];
 
-/*   useEffect(() => {
-    const authUser = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        navigate("/login");
-      }
-      try {
-        const getToken = JSON.parse(localStorage.getItem("token"));
-        const token = `Bearer ${getToken}`;
-        const response = await axios.post(
-          "http://localhost:3000/auth/authenticate-user",
-          {},
-          { headers: { Authorization: token } }
-        );
-        setLoading(false);
-      } catch (err) {
-        console.log(err);
-        navigate("/login");
-      }
-    };
-    authUser();
-  }, [navigate]); */
+/*   // useEffect(() => {
+  //   const authUser = async () => {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       navigate("/login");
+  //     }
+  //     try {
+  //       const getToken = JSON.parse(localStorage.getItem("token"));
+  //       const token = `Bearer ${getToken}`;
+  //       const response = await axios.post(
+  //         "http://localhost:3000/auth/authenticate-user",
+  //         {},
+  //         { headers: { Authorization: token } }
+  //       );
+  //       setLoading(false);
+  //     } catch (err) {
+  //       console.log(err);
+  //       navigate("/login");
+  //     }
+  //   };
+  //   authUser();
+  // }, [navigate]); */
 
-/*   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i>
-      </div>
-    );
-  } */
+/*   // if (loading) {
+  //   return (
+  //     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+  //       <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i>
+  //     </div>
+  //   );
+  // } */
 
   return (
     <div className="grid p-4">

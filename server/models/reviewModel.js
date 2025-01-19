@@ -23,7 +23,7 @@ const reviewSchema = new Schema({
         type : [String,],
         required : true
     },
-    submissionID: {
+    attachmentId: {
         type: Schema.Types.ObjectId,
         // ref : Submission // Need Submission Model
         required: true

@@ -1,5 +1,6 @@
 const Course = require("../models/courseModel");
 const Request = require("../models/requestSchema");
+const userModel = require("../models/userModel");
 
 const isCourseApproved = async (req, res, next) => {
     try{
@@ -15,6 +16,23 @@ const isCourseApproved = async (req, res, next) => {
 
         next();
     } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+}
+
+const getCourse = async (req, res, next) => {
+    try {
+        const { courseId } = req.params;
+        const course = await Course.findById(courseId);
+        if (!course) {
+            throw new Error("Course not found");
+        }
+
+        res.status(201).json({
+            message: "Success!",
+            data: course,
+        })
+    } catch(e) {
         res.status(500).json({ message: e.message });
     }
 }
@@ -106,8 +124,20 @@ const getCourseAssignments = async (req, res) => {
     }
 }
 
+const getAllCourses = async (req, res) => {
+    try{
+        const courseIds = await userModel.findById(req.user.id).populate('courses');
+        const courses = await Course.find({ _id: { $in: courseIds } });
+
+        res.json({ message: "success", data: courses });
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+}
+
 // rememeber to check is isApproved field of course is true or not
 module.exports = {
+    getCourse,
     isCourseApproved,
     createCourse,
     getCoursesByInstructor,
@@ -115,4 +145,5 @@ module.exports = {
     getEnrollmentRequests,
     approveEnrollmentRequest,
     getCourseAssignments,
+    getAllCourses
 }
