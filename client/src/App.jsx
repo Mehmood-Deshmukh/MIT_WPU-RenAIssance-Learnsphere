@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router";
 import Home from "./Pages/Home";
 import Login from "./Pages/Login";
@@ -13,46 +12,47 @@ import TeacherDashboardMain from "./Pages/TeacherDashboardMain";
 
 import AdminLogin from "./Pages/Admin/Login";
 import AdminHome from "./Pages/Admin/Home";
+import Spinner from "./components/Spinner";
 
 import CoursePage from "./Pages/CoursePage";
 
 const App = () => {
-	const { state, dispatch } = useAuthContext();
-	const { isAuthenticated, loading } = state;
-	console.log(state);
-	if (loading) return <h1>Loading...</h1>;
+  const { state, dispatch } = useAuthContext();
+  const { isAuthenticated, loading } = state;
+  console.log(state);
+  if (loading) return <Spinner />;
 
-	return (
-		<>
-			<Routes>
-				<Route
-					path="/"
-					element={isAuthenticated && !loading ? <Home /> : <Login />}
-				/>
+  return (
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={isAuthenticated && !loading ? <Home /> : <Login />}
+        />
 
-				<Route path="/login" element={<Login />} />
-				<Route path="/signup" element={<Singup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Singup />} />
 
-				<Route
-					path="/home"
-					element={isAuthenticated ? <Home /> : <Navigate to="/login" />}
-				/>
-				<Route path="/studentAssignment/:id" element={<StudentAssignment />} />
-				<Route path="/studentDashboard" element={<StudentDashboard />} />
-				<Route
-					path="/teacherdashboard/:courseid"
-					element={<TeacherDashboardCourse />}
-				/>
-				<Route path="/teacher-dashboard" element={<TeacherDashboardMain />} />
-				<Route path="*" element={<h1>404 Not Found</h1>} />
+        <Route
+          path="/home"
+          element={isAuthenticated ? <Home /> : <Navigate to="/login" />}
+        />
+        <Route path="/studentAssignment/:id" element={<StudentAssignment />} />
+        <Route path="/studentDashboard" element={<StudentDashboard />} />
+        <Route
+          path="/teacherdashboard/:courseid"
+          element={<TeacherDashboardCourse />}
+        />
+        <Route path="/teacher-dashboard" element={<TeacherDashboardMain />} />
+        <Route path="*" element={<h1>404 Not Found</h1>} />
 
-				{/* admin routes */}
-				<Route path="/admin/login" element={<AdminLogin />} />
-				<Route path="/admin/home" element={<AdminHome />} />
-				<Route path="/courses/:id" element={<CoursePage />} />
-			</Routes>
-		</>
-	);
+        {/* admin routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/home" element={<AdminHome />} />
+        <Route path="/courses/:id" element={<CoursePage />} />
+      </Routes>
+    </>
+  );
 };
 
 export default App;
