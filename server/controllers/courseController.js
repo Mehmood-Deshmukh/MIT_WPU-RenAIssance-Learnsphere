@@ -35,12 +35,8 @@ const createCourse = async (req, res) => {
         });
 
         await course.save();
-        const request = new Request({
-            type: "COURSE_CREATION",
-            requestedBy: createdBy,
-            course: course._id,
-            reqeustedTo: "admin"
-        });
+
+        const request = await Request.createCourseCreationRequest(createdBy, course._id);
         await request.save();
 
         res.json({ message: "Request for course creation sent for approval", data: course });
@@ -68,12 +64,8 @@ const enrollStudent = async (req, res) => {
             throw new Error("Course not found");
         }
 
-        const request = new Request({
-            type: "COURSE_ENROLLMENT",
-            requestedBy: studentId,
-            course: courseId,
-            reqeustedTo: "teacher"
-        });
+
+        const request = await Request.createCourseEnrollmentRequest(studentId, courseId, course.instructors);
         await request.save();
 
         res.json({ message: "Request for course enrollment sent for approval", data: course });
