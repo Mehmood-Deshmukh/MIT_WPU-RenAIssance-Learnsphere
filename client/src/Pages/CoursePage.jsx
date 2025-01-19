@@ -13,7 +13,6 @@ import AssignmentStatusTemplate from "../components/AssignmentStatusTemplate";
 
 const CoursePage = () => {
   const { state } = useAuthContext();
-  const currentUserId = state?.user?.id;
   const { id } = useParams();
   const [course, setCourse] = useState(null);
   const [instructorName, setInstructorName] = useState("");
@@ -110,10 +109,17 @@ const CoursePage = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${state.token}`,
           },
+          body: JSON.stringify({
+            studentId: state.user._id,
+          }),
         }
       );
+
+      const curr = await response.json();
+      console.log(curr);
+      
 
       if (response.data) {
         setIsEnrolled(true);
@@ -131,6 +137,8 @@ const CoursePage = () => {
         detail: "Failed to enroll in the course",
         life: 3000,
       });
+
+      console.error("Error enrolling in course:", err);
     } finally {
       setEnrolling(false);
     }
