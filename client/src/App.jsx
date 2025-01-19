@@ -15,7 +15,7 @@ import AdminHome from "./Pages/Admin/Home";
 import Spinner from "./components/Spinner";
 
 import CoursePage from "./Pages/CoursePage";
-
+import Sidebar from "./components/Sidebar"
 const App = () => {
 
   const { state, dispatch } = useAuthContext();
@@ -25,6 +25,7 @@ const App = () => {
 
   return (
     <>
+     {isAuthenticated && <Sidebar/> }
       <Routes>
         <Route
           path="/"
