@@ -7,7 +7,7 @@ const router = express.Router();
 
 // note that this route will only return assignments created by particular teacher
 router.get('/', authenticateUser, verifyRole('teacher'), getAssignments);
-router.get('/a/:id', authenticateUser, verifyRole('teacher'), getAssignmentById);
+router.get('/a/:id', getAssignmentById);
 
 router.post('/create-assignment', authenticateUser, verifyRole('teacher'), createAssignment);
 router.put('/update-assignment/:id', authenticateUser, verifyRole('teacher'), updateAssignment);

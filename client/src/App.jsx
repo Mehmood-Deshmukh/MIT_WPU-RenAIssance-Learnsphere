@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router";
 import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Singup from "./Pages/Signup";
+
 import useAuthContext from "./hooks/useAuthContext";
 
 const App = () => {
@@ -29,6 +30,7 @@ const App = () => {
 						isAuthenticated ? <Home /> : <Navigate to="/login" />
 					}
 				/>
+        <Route path="/studentAssignment/:id" element={<StudentAssignment />} />
 			</Routes>
 		</>
 	);

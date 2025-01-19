@@ -82,8 +82,8 @@ const assignmentSchema = new Schema({
         type: Array, // schema for attachments / files needs to be defined
     },
     createdBy: {
-        type: Schema.Types.ObjectId,
-        ref: User,
+        type: String,
+        required: true,
     },
     submissions: {
         type: Array, // schema for submissions needs to be defined

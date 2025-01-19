@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Assignment = require('../models/assignmentModel');
 const Attachment = require('../models/attachmentModel');
+const User = require('../models/userModel');
 
 const fileController = {
     uploadFile: async (req, res) => {
@@ -57,6 +58,8 @@ const fileController = {
 
             assignment.attachments.push(savedAttachment._id);
             await assignment.save();
+
+            const user = await User.findById(req.user.id);
 
             return res.status(201).json({
                 message: 'File uploaded successfully',
@@ -212,6 +215,9 @@ const fileController = {
                 res.status(500).json({ message: 'Error deleting file' });
             }
         }
+    },
+    getTextFromFiles: async (req, res) => {
+        /*  */
     }
 };
 
