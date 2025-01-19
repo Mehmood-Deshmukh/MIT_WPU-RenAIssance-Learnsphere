@@ -20,6 +20,10 @@ const courseSchema = new Schema({
 		type: Date,
 		default: Date.now,
 	},
+	assignments: {
+		type: [Schema.Types.ObjectId],
+		ref: "Assignment",
+	},
 	instructors: {
 		type: [Schema.Types.ObjectId],
 		ref: "User",
@@ -36,7 +40,11 @@ const courseSchema = new Schema({
 	students: {
 		type: [Schema.Types.ObjectId],
 		ref: "User",
-	}
+	},
+	isApproved: {
+		type: Boolean,
+		default: false,
+	},
 });
 
 module.exports = mongoose.model("Course", courseSchema);

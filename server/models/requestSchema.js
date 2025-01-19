@@ -103,7 +103,7 @@ Request.approveRequest = async function (requestId, feedback) {
 
     if (request.type === "COURSE_CREATION") {
         const course = await Course.findById(request.course);
-        course.instructors.push(request.requestedBy);
+        course.isApproved = true;
         await course.save();
     }
 
