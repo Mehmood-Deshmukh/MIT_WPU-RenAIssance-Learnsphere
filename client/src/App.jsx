@@ -6,10 +6,30 @@ import Singup from "./Pages/Signup";
 import useAuthContext from "./hooks/useAuthContext";
 import StudentAssignment from "./Pages/StudentAssignment";
 import StudentDashboard from "./Pages/studentDashboard";
+
+import TeacherDashboardCourse from "./Pages/TeacherDashboardCourse";
+import TeacherDashboardMain from "./Pages/TeacherDashboardMain";
+// import ViewEnrollmentRequest from "./components/ViewEnrollmentRequest";
+
 import AdminLogin from "./Pages/Admin/Login";
 import AdminHome from "./Pages/Admin/Home";
 
 import CoursePage from "./Pages/CoursePage";
+
+const App = () => {
+  const { state, dispatch } = useAuthContext();
+  const { isAuthenticated, loading } = state;
+  console.log(state);
+  if (loading) return <h1>Loading...</h1>;
+
+  return (
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={isAuthenticated && !loading ? <Home /> : <Login />}
+        />
+
 
 const App = () => {
 	const { state, dispatch } = useAuthContext();
@@ -25,8 +45,10 @@ const App = () => {
 					element={isAuthenticated && !loading ? <Home /> : <Login />}
 				/>
 
-				<Route path="/login" element={<Login />} />
-				<Route path="/signup" element={<Singup />} />
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Singup />} />
+
 
 				<Route
 					path="/home"
@@ -34,7 +56,11 @@ const App = () => {
 				/>
 				<Route path="/studentAssignment/:id" element={<StudentAssignment />} />
 				<Route path="/studentDashboard" element={<StudentDashboard />} />
-
+        <Route
+          path="/teacherdashboard/:courseid"
+          element={<TeacherDashboardCourse />}
+        />
+        <Route path="/teacher-dashboard" element={<TeacherDashboardMain />} 
 				<Route path="*" element={<h1>404 Not Found</h1>} />
 
 				{/* admin routes */}
