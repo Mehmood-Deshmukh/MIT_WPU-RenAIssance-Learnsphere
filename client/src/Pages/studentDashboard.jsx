@@ -11,61 +11,6 @@ import { Button } from 'primereact/button';
 import { useState, useEffect } from 'react';
 import { DataView } from 'primereact/dataview';
 
-const courseTemplate = (course) => {
-  return (
-    <div className="col-12 md:col-6 lg:col-4 p-2">
-      <Card className="h-full">
-        <div className="flex flex-column h-full">
-          <div className="flex justify-content-between align-items-center">
-            <h3 className="text-xl font-bold m-0">{course.name}</h3>
-            {/* <Tag
-              severity={getStatusSeverity(course.status)}
-              value={course.status?.toUpperCase()}
-            /> */}
-          </div>
-          <div className="my-3">
-            <p className="m-0">
-              <strong>Course Title: {course.title}</strong>
-            </p>
-            <p className="m-0">
-              <strong>
-                Description: {course.description.substring(0, 20)}....
-              </strong>
-            </p>
-            <p className="m-0">
-              <strong>No of Students: {course.students.length}</strong>
-            </p>
-            <p className="m-0">
-              <strong>
-                Course Status :{" "}
-                {course.isApproved ? (
-                  <span className="text-green-700">Ongoing</span>
-                ) : (
-                  <span className="text-orange-500">Pending Approval</span>
-                )}
-              </strong>
-            </p>
-          </div>
-
-          <div className="mt-auto pt-3">
-            {course.isApproved ? (
-              <Button
-                label="View Details"
-                className="p-button-outlined w-full"
-                onClick={() => navigate(`/teacherdashboard/${course._id}`)}
-              />
-            ) : (
-              <div className="text-orange-500 border-2 p-2 text-center font-semibold rounded-md border-orange-500">
-                Waiting for Approval
-              </div>
-            )}
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
-};
-
 const EmptyState = ({ icon, title, message, action }) => (
   <div className="flex flex-column align-items-center justify-content-center py-8 px-4">
     <i className={`${icon} text-blue-300 mb-4`} style={{ fontSize: '3rem' }}></i>
@@ -89,6 +34,60 @@ const StudentDashboard = () => {
   const {state, dispatch} = useAuthContext();
   const user = state.user;
   const [allCourses, setAllCourses] = useState([]);
+  const courseTemplate = (course) => {
+    return (
+      <div className="col-12 md:col-6 lg:col-4 p-2">
+        <Card className="h-full">
+          <div className="flex flex-column h-full">
+            <div className="flex justify-content-between align-items-center">
+              <h3 className="text-xl font-bold m-0">{course.name}</h3>
+              {/* <Tag
+                severity={getStatusSeverity(course.status)}
+                value={course.status?.toUpperCase()}
+              /> */}
+            </div>
+            <div className="my-3">
+              <p className="m-0">
+                <strong>Course Title: {course.title}</strong>
+              </p>
+              <p className="m-0">
+                <strong>
+                  Description: {course.description.substring(0, 20)}....
+                </strong>
+              </p>
+              <p className="m-0">
+                <strong>No of Students: {course.students.length}</strong>
+              </p>
+              <p className="m-0">
+                <strong>
+                  Course Status :{" "}
+                  {course.isApproved ? (
+                    <span className="text-green-700">Ongoing</span>
+                  ) : (
+                    <span className="text-orange-500">Pending Approval</span>
+                  )}
+                </strong>
+              </p>
+            </div>
+  
+            <div className="mt-auto pt-3">
+              {course.isApproved ? (
+                <Button
+                  label="View Details"
+                  className="p-button-outlined w-full"
+                  onClick={() => navigate(`/courses/${course._id}`)}
+                />
+              ) : (
+                <div className="text-orange-500 border-2 p-2 text-center font-semibold rounded-md border-orange-500">
+                  Waiting for Approval
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  };
 
   const fetchAllCourses = async () => {
     try {

@@ -75,7 +75,8 @@ const getCoursesByInstructor = async (req, res) => {
 
 const enrollStudent = async (req, res) => {
     try{
-        const { courseId, studentId } = req.body;
+        const {studentId } = req.body;
+        const { courseId } = req.params;
         const course = await Course.findById(courseId);
         if (!course) {
             throw new Error("Course not found");
