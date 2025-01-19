@@ -1,80 +1,96 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Lock, User } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { InputText } from 'primereact/inputtext';
+import { Password } from 'primereact/password';
+import { Button } from 'primereact/button';
+import { Card } from 'primereact/card';
+import { Message } from 'primereact/message';
+import useAuthContext from '../../hooks/useAuthContext';
+import { useNavigate } from 'react-router';
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const { dispatch } = useAuthContext();
+    const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
 
-  };
+        try {
+          const response = await fetch('http://localhost:3000/api/admin/login', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ email, password }),
+          });
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Admin Login</CardTitle>
-          <CardDescription className="text-center">
-            Enter your credentials to access the admin panel
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
-            <div className="space-y-2">
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
+          const data = await response.json();
+          localStorage.setItem("user", JSON.stringify(data.user));
+          localStorage.setItem("token", data.token);
+
+          dispatch({ type: 'LOGIN', payload: data });
+          navigate("/admin/home");
+        } catch (err) {
+            setError('An error occurred. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="flex align-items-center justify-content-center min-h-screen bg-gray-100">
+            <div className="w-full md:w-5 lg:w-4 xl:w-3">
+                <Card title="Admin Login" className="shadow-2">
+                    <form onSubmit={handleSubmit} className="p-fluid">
+                        {error && (
+                            <div className="mb-5">
+                                <Message severity="error" text={error} />
+                            </div>
+                        )}
+
+                        <div className="field mb-6">
+                            <span className="p-float-label p-input-icon-left">
+                                <InputText
+                                    id="email"
+                                    type='email'
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                                <label htmlFor="email">email</label>
+                            </span>
+                        </div>
+
+                        <div className="field mb-4 mt-3">
+                            <span className="p-float-label p-input-icon-left">
+                                <Password
+                                    id="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    feedback={false}
+                                    toggleMask
+                                    required
+                                />
+                                <label htmlFor="password">Password</label>
+                            </span>
+                        </div>
+
+                        <Button
+                            type="submit"
+                            label={loading ? 'Signing in...' : 'Sign in'}
+                            icon="pi pi-sign-in"
+                            loading={loading}
+                        />
+                    </form>
+                </Card>
             </div>
-
-            <div className="space-y-2">
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default AdminLogin;
